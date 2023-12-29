@@ -1,0 +1,10 @@
+Flask
+git+https://github.com/armurox/flask-session.git
+requests
+werkzeug
+datetime
+pytz
+pytest
+openai==1.3.8
+psycopg2-binary
+Flask-SqlAlchemy

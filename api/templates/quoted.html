@@ -1,0 +1,479 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quote
+{% endblock %}
+
+{% block main %}
+    <div class="bg-dark text-center rounded p-4 shadow text-light opacity-75">
+        <form action="/buy" method="post">
+            <h2 style="color:white">The current price per unit of {{stock.symbol}}({{stock.name}}) is {{stock.price | usd}}</h2>
+            <br>
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" name="shares" min="1" placeholder="Number to Buy" type="number">
+            </div>
+            <input type="hidden" name="symbol" value="{{stock.symbol}}">
+            <input type="hidden" name="type" value="{{type}}">
+            <button class="btn btn-primary" id="submitButton_1" type="submit">Buy</button>
+        </form>
+    </div>
+    <br>
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-8">
+            <div class="bg-light text-center rounded p-4 shadow h-100 opacity-75">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">{{stock.name}} Historical Performance</h6>
+                    <div>
+                        <select id="time" class="form-select" aria-label="Default select example">
+                            <option value="month">Past Month</option>
+                            <option value="year" selected>Past Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="container" class="w-100 d-flex justify-content-center container-fluid">
+                    <div id ="stockChart" class="w-100 d-flex"></div>
+                </div>
+                <canvas class="chart" id="stdChart"></canvas>
+                <canvas class="chart" id="adxChart"></canvas>
+                <canvas class="chart" id="rsiChart"></canvas>
+                <canvas class="chart" id="williamsChart"></canvas>
+                <canvas class="chart" id="percentChart"></canvas>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xl-4">
+            <div class="bg-light text-center text-light rounded p-4 shadow opacity-75">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    {% if type == "Forex" %}
+                        <h6 class="mb-0">Forex Market Feed</h6>
+                    {% else %}
+                        <h6 class="mb-0">{{stock.name}} Market Feed</h6>
+                    {% endif %}
+                    <div>
+                        <select class="form-select" aria-label="Default select example">
+                            <option selected>Latest</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- <canvas id="worldwide-sales"></canvas> -->
+                <img id="news1_img">
+                <h5 id="news1"></h5>
+                <img id="news2_img">
+                <h5 id="news2"></h5>
+                <img id="news3_img">
+                <h5 id="news3"></h5>
+                <img id="news4_img">
+                <h5 id="news4"></h5>
+                <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>    
+    <script>
+        function validateSelection_1() {
+        var assetTypeSelect = document.getElementById('assetTypeSelect');
+        var submitButton = document.getElementById('submitButton_1');
+        if (assetTypeSelect.value != "") {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+       // Get today's date
+        const today = new Date();
+
+        // Get yesterday's date
+        const endDate = new Date(today);
+        endDate.setDate(endDate.getDate());
+
+        // Get the date one month ago
+        let startDate = new Date(today);
+        let choice = document.querySelector("#time");
+        let symbol = "{{stock.symbol}}"
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        const tempStartData = startDate.toISOString().split('T')[0];
+        const tempEndData = endDate.toISOString().split('T')[0];
+        console.log(tempStartData, tempEndData)
+        async function fetchStockDataMonth(symbol, formattedStartDate, formattedEndDate) {
+            const response = await fetch(`https://financialmodelingprep.com/api/v3/historical-price-full/${symbol}?from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+            const data = await response.json();
+            return data.historical;
+        }
+
+        async function calculateMovingAverage(symbol, formattedStartDate, formattedEndDate) {
+            const response = await fetch(`https://financialmodelingprep.com/api/v3/technical_indicator/1day/${symbol}?type=sma&period=10&from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+            const data = await response.json();
+            return data
+        }
+
+        async function fetchStandardDeviationData(symbol, formattedStartDate, formattedEndDate) {
+            const response = await fetch(`https://financialmodelingprep.com/api/v3/technical_indicator/1day/${symbol}?type=standardDeviation&period=10&from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+            const data = await response.json();
+            return data;
+        }
+
+        async function fetchAdxData(symbol, formattedStartDate, formattedEndDate) {
+            const response = await fetch(`https://financialmodelingprep.com/api/v3/technical_indicator/1day/${symbol}?type=adx&period=10&from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+            const data = await response.json();
+            return data;
+        }
+
+        async function fetchRsiData(symbol, formattedStartDate, formattedEndDate) {
+            const response = await fetch(`https://financialmodelingprep.com/api/v3/technical_indicator/1day/${symbol}?type=rsi&period=10&from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+            const data = await response.json();
+            return data;
+        }
+
+        async function fetchWilliamsData(symbol, formattedStartDate, formattedEndDate) {
+            const response = await fetch(`https://financialmodelingprep.com/api/v3/technical_indicator/1day/${symbol}?type=williams&period=10&from=${formattedStartDate}&to=${formattedEndDate}&apikey=6fbceaefb411ee907e9062098ef0fd66`);
+            const data = await response.json();
+            return data;
+        }
+
+        function renderAdx(data) {
+            const reversedData = [...data].reverse();
+            let chart = Chart.getChart('adxChart')
+            if (chart) {
+                chart.destroy()
+            }
+            const ctx = document.getElementById('adxChart').getContext('2d');
+            const chartData = {
+                labels: reversedData.map(item => item.date),
+                datasets: [{
+                    label: '10 Day Average Directional Index',
+                    data: reversedData.map(item => item.adx),
+                    borderColor: 'green',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                }]
+            };
+        
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    legend: {
+                        onClick: function (e) {
+                            e.stopPropagation();
+                        }// Disable legend click functionality
+                    }
+                }
+            });
+        }
+
+        function renderRsi(data) {
+            const reversedData = [...data].reverse();
+            let chart = Chart.getChart('rsiChart')
+            if (chart) {
+                chart.destroy()
+            }
+            const ctx = document.getElementById('rsiChart').getContext('2d');
+            const chartData = {
+                labels: reversedData.map(item => item.date),
+                datasets: [{
+                    label: '10 Day Relative Strength Index',
+                    data: reversedData.map(item => item.rsi),
+                    borderColor: 'orange',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                }]
+            };
+        
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    legend: {
+                        onClick: function (e) {
+                            e.stopPropagation();
+                        }// Disable legend click functionality
+                    }
+                }
+            });
+        }
+
+        function renderWilliams(data) {
+            const reversedData = [...data].reverse();
+            let chart = Chart.getChart('williamsChart')
+            if (chart) {
+                chart.destroy()
+            }
+            const ctx = document.getElementById('williamsChart').getContext('2d');
+            const chartData = {
+                labels: reversedData.map(item => item.date),
+                datasets: [{
+                    label: '10 Day Williams R% Index',
+                    data: reversedData.map(item => item.williams),
+                    borderColor: 'red',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                }]
+            };
+        
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    legend: {
+                        onClick: function (e) {
+                            e.stopPropagation();
+                        }// Disable legend click functionality
+                    }
+                }
+            });
+        }
+
+        async function renderCandlestickChart(data, symbol, start, end) {
+            const trace = {
+                x: data.map(item => item.date),
+                close: data.map(item => item.close),
+                high: data.map(item => item.high),
+                low: data.map(item => item.low),
+                open: data.map(item => item.open),
+        
+                // Customization of the candlestick chart
+                increasing: { line: { color: 'green' } },
+                decreasing: { line: { color: 'red' } },
+                
+                type: 'candlestick',
+                name: `${symbol}`
+            };
+
+            const vwapDataTrace = {
+                x: data.map(item => item.date),
+                y: data.map(item => item.vwap),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'vwap'
+            }
+
+            // Fetch the SMA data
+            const movingAverageData = await calculateMovingAverage(symbol, start, end);
+            // Create a new trace for the SMA
+            const movingAverageTrace = {
+                x: movingAverageData.map(item => item.date),
+                y: movingAverageData.map(item => item.sma),
+                type: 'scatter',
+                mode: 'lines',
+                name: '10-day SMA'
+            };
+        
+            const layout = {
+                title: `${symbol} Perfomance`,
+                xaxis: {
+                    type: 'date',
+                    title: 'Date'
+                },
+                yaxis: {
+                    autorange: true,
+                    title: 'Stock Price'
+                }
+            };
+        
+            Plotly.newPlot('stockChart', [trace, movingAverageTrace, vwapDataTrace], layout, {responsive: true});
+        }
+        
+
+        function renderPercent(data) {
+            const reversedData = [...data].reverse();
+            let chart = Chart.getChart('percentChart');
+            if (chart) {
+                chart.destroy()
+            }
+            const ctx = document.getElementById('percentChart').getContext('2d');
+            const chartData = {
+                labels: reversedData.map(item => item.date),
+                datasets: [{
+                    label: 'Percent Change (Daily Change)',
+                    data: reversedData.map(item => item.changePercent),
+                    borderColor: 'purple',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                }]
+            };
+        
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    legend: {
+                        onClick: function (e) {
+                            e.stopPropagation();
+                        }// Disable legend click functionality
+                    }
+                }
+            });
+        }
+
+        function renderStd(data) {
+            const reversedData = [...data].reverse();
+            let chart = Chart.getChart('stdChart');
+            if (chart) {
+                chart.destroy()
+            }
+            const ctx = document.getElementById('stdChart').getContext('2d');
+            const chartData = {
+                labels: reversedData.map(item => item.date),
+                datasets: [{
+                    label: '10 Day Standard Deviation',
+                    data: reversedData.map(item => item.standardDeviation),
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                }]
+            };
+
+        
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    legend: {
+                        onClick: function (e) {
+                            e.stopPropagation();
+                        }// Disable legend click functionality
+                    }
+                }
+            });
+        }
+
+        fetchStockDataMonth(symbol, tempStartData, tempEndData).then(data => {renderPercent(data), renderCandlestickChart(data, symbol, tempStartData, tempEndData)}).catch(err => console.log(err));
+        fetchStandardDeviationData(symbol, tempStartData, tempEndData).then(data => renderStd(data)).catch(err => console.log(err));
+        fetchAdxData(symbol, tempStartData, tempEndData).then(data => renderAdx(data)).catch(err => console.log(err));
+        fetchRsiData(symbol, tempStartData, tempEndData).then(data => renderRsi(data)).catch(err => console.log(err));
+        fetchWilliamsData(symbol, tempStartData, tempEndData).then(data => renderWilliams(data)).catch(err => console.log(err));
+        choice.onchange = async () => {
+            if (choice.value === "month") {
+                startDate = new Date(today);
+                startDate.setMonth(startDate.getMonth() - 1);
+                month = true;
+            } else {
+                startDate = new Date(today);
+                startDate.setFullYear(startDate.getFullYear() - 1);
+                month = false;
+            }
+
+            // Format the dates as YYYY-MM-DD
+            const formattedStartDate = startDate.toISOString().split('T')[0];
+            const formattedEndDate = endDate.toISOString().split('T')[0];
+            console.log(formattedStartDate,formattedEndDate)
+            const stockData = await fetchStockDataMonth(symbol, formattedStartDate, formattedEndDate)
+            renderPercent(stockData)
+            renderCandlestickChart(stockData, symbol, formattedStartDate, formattedEndDate)
+            const stdData = await fetchStandardDeviationData(symbol, formattedStartDate, formattedEndDate)
+            renderStd(stdData)
+            const adxData = await fetchAdxData(symbol, formattedStartDate, formattedEndDate)
+            renderAdx(adxData)
+            const rsiData = await fetchRsiData(symbol, formattedStartDate, formattedEndDate)
+            renderRsi(rsiData)
+            const wiliamsData = await fetchWilliamsData(symbol, formattedStartDate, formattedEndDate)
+            renderWilliams(wiliamsData)
+        }
+        function updateNews() {
+            const type = "{{type}}"
+            console.log(type)
+            if (type === "Forex") {
+                fetch(`https://financialmodelingprep.com/api/v4/forex_news?page=0&apikey=6fbceaefb411ee907e9062098ef0fd66`)
+            .then(response => response.json())
+            .then(result => {
+            const news1 = document.querySelector("#news1")
+            const news1Image = document.querySelector("#news1_img")
+            const news2 = document.querySelector("#news2")
+            const news2Image = document.querySelector("#news2_img")
+            const news3 = document.querySelector("#news3")
+            const news3Image = document.querySelector("#news3_img")
+            const news4 = document.querySelector("#news4")
+            const news4Image = document.querySelector("#news4_img")
+            news1.innerHTML = result[0]["title"] + "<div>Date: " + result[0]["publishedDate"] + "</div>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result[0]["url"] + ">" + result[0]["url"] + "</a></div>"
+            news1Image.src = result[0]["image"]
+            news1.classList.add('slide-in');
+            news1.classList.add('news');
+            news1Image.classList.add('slide-in');
+            news1Image.classList.add('news');
+            news2.innerHTML = result[1]["title"] + "<div>Date: " + result[1]["publishedDate"] + "</div>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result[1]["url"] + ">" + result[1]["url"] + "</a></div>"
+            news2Image.src = result[1]["image"]
+            news2.classList.add('slide-in');
+            news2.classList.add('news');
+            news2Image.classList.add('slide-in');
+            news2Image.classList.add('news');
+            news3.innerHTML = result[2]["title"] + "<div>Date: " + result[2]["publishedDate"] + "</div>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result[2]["url"] + ">" + result[2]["url"] + "</a></div>"
+            news3Image.src = result[2]["image"]
+            news3.classList.add('slide-in');
+            news3.classList.add('news');
+            news3Image.classList.add('slide-in');
+            news3Image.classList.add('news');
+            news4.innerHTML = result[3]["title"] + "<div>Date: " + result[3]["publishedDate"] + "</div>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result[3]["url"] + ">" + result[3]["url"] + "</a></div>"
+            news4Image.src = result[3]["image"]
+            news4.classList.add('slide-in');
+            news4.classList.add('news');
+            news4Image.classList.add('slide-in');
+            news4Image.classList.add('news');
+        })
+            .catch(err => document.querySelector("#news1").innerHTML = "<div>Cannot find news feed specific to this asset at the moment</div>")
+            } else{
+            fetch(`https://stocknewsapi.com/api/v1?tickers=${symbol}&items=4&page=1&token=qvgfptpokzmfkdag1opnwj9c2svtukxyseprol1n`)
+            .then(response => response.json())
+            .then(result => {
+            const news1 = document.querySelector("#news1")
+            const news1Image = document.querySelector("#news1_img")
+            const news2 = document.querySelector("#news2")
+            const news2Image = document.querySelector("#news2_img")
+            const news3 = document.querySelector("#news3")
+            const news3Image = document.querySelector("#news3_img")
+            const news4 = document.querySelector("#news4")
+            const news4Image = document.querySelector("#news4_img")
+            news1.innerHTML = result.data[0]["title"] + "<div>Date: " + result.data[0]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[0]["sentiment"] + "</div class='text-center'>" + "<div>\nLink to article: </div>" + "<div><a style='color:blue; font-size: 12px' class='text-center' href=" + result.data[0]["news_url"] + ">" + result.data[0]["news_url"] + "</a></div>"
+            news1Image.src = result.data[0]["image_url"]
+            news1.classList.add('slide-in');
+            news1.classList.add('news');
+            news1Image.classList.add('slide-in');
+            news1Image.classList.add('news');
+            news2.innerHTML = result.data[1]["title"] + "<div>Date: " + result.data[1]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[1]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<br><a style='color:blue; font-size: 12px' class='text-center' href=" + result.data[1]["news_url"] + ">" + result.data[1]["news_url"] + "</a>"
+            news2Image.src = result.data[1]["image_url"]
+            news2.classList.add('slide-in');
+            news2.classList.add('news');
+            news2Image.classList.add('slide-in');
+            news2Image.classList.add('news');
+            news3.innerHTML = result.data[2]["title"] + "<div>Date: " + result.data[2]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[2]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<br><a style='color:blue; font-size: 12px' class='text-center' href=" + result.data[2]["news_url"] + ">" + result.data[2]["news_url"] + "</a>"
+            news3Image.src = result.data[2]["image_url"]
+            news3.classList.add('slide-in');
+            news3.classList.add('news');
+            news3Image.classList.add('slide-in');
+            news3Image.classList.add('news');
+            news4.innerHTML = result.data[3]["title"] + "<div>Date: " + result.data[3]["date"] + "</div>" + "<div style='color:green'>Sentiment: " + result.data[3]["sentiment"] + "</div class='text-center'>" + "\nLink to article: " + "<br><a style='color:blue; font-size: 12px' class='text-center'  href=" + result.data[3]["news_url"] + ">" + result.data[3]["news_url"] + "</a>"
+            news4Image.src = result.data[3]["image_url"]
+            news4.classList.add('slide-in');
+            news4.classList.add('news');
+            news4Image.classList.add('slide-in');
+            news4Image.classList.add('news');
+        })
+            .catch(err => document.querySelector("#news1").innerHTML = "<div>Cannot find news feed specific to this asset at the moment</div>")
+        }};
+
+        document.addEventListener("DOMContentLoaded", () => {
+
+            updateNews();
+            setInterval(updateNews, 3000000); // Update every 5 minutes
+        });
+    </script>
+{% endblock %}

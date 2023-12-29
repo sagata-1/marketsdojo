@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="42" height="42" viewBox="0 0 42 42">
+  <defs>
+    <filter id="ic_expand" x="0" y="0" width="42" height="42" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="ic_expand-2" data-name="ic_expand" transform="translate(326 -529)">
+    <g transform="matrix(1, 0, 0, 1, -326, 529)" filter="url(#ic_expand)">
+      <path id="ic_expand-3" data-name="ic_expand" d="M4.688,0H19.313A4.7,4.7,0,0,1,24,4.688V19.313A4.7,4.7,0,0,1,19.313,24H4.688A4.7,4.7,0,0,1,0,19.313V4.688A4.7,4.7,0,0,1,4.688,0Zm.281,18.152a.879.879,0,0,0,.879.879h4.6a.879.879,0,1,0,0-1.758H7.97L11.241,14A.879.879,0,0,0,10,12.758L6.727,16.031V13.552a.879.879,0,1,0-1.758,0Zm14.063-12.3a.879.879,0,0,0-.879-.879h-4.6a.879.879,0,1,0,0,1.758h2.478L12.758,10A.879.879,0,0,0,14,11.242l3.272-3.272v2.478a.879.879,0,1,0,1.758,0Z" transform="translate(9 9)" fill="#fff" fill-rule="evenodd"/>
+    </g>
+  </g>
+</svg>

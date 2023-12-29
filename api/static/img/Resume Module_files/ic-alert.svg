@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="ic_alert" width="16" height="16" data-name="ic alert" viewBox="0 0 16 16">
+    <defs>
+        <style>
+            .cls-1{fill:#fff}
+        </style>
+    </defs>
+    <g id="Path_44450" data-name="Path 44450">
+        <path id="Path_44456" d="M8 16a8 8 0 1 1 8-8 8.009 8.009 0 0 1-8 8zM8 1.441A6.559 6.559 0 1 0 14.559 8 6.567 6.567 0 0 0 8 1.441z" class="cls-1" data-name="Path 44456"/>
+    </g>
+    <g id="Path_44451" data-name="Path 44451" transform="translate(7.25 4.3)">
+        <path id="Path_44457" d="M8.33 9.08a.75.75 0 0 1-.75-.75V5.3a.75.75 0 0 1 1.5 0v3.03a.75.75 0 0 1-.75.75z" class="cls-1" data-name="Path 44457" transform="translate(-7.58 -4.548)"/>
+    </g>
+    <g id="Path_44452" data-name="Path 44452" transform="translate(7.25 10.158)">
+        <path id="Path_44458" d="M8.33 12.109a.928.928 0 0 1-.29-.049.807.807 0 0 1-.24-.17.637.637 0 0 1-.16-.241.71.71 0 0 1-.06-.29.749.749 0 0 1 .22-.529.774.774 0 0 1 1.06 0 .749.749 0 0 1-.53 1.279z" class="cls-1" data-name="Path 44458" transform="translate(-7.58 -10.62)"/>
+    </g>
+</svg>

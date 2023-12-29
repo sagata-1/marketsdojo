@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid bg-dark text-center rounded p-4 shado opacity-75 table-responsive-sm">
+    <h1 style="color:green">Achievements</h1>
+    <h1 style="color:white" id="none"></h1>
+    <div class="row">
+        <div id="bought" class="col-sm"></div>
+        <div id="sold" class="col-sm"></div>
+    </div>
+</div>
+<script>
+    const boughtAchievementImage = "/static/img/FirstBuy.png";
+    const soldAchievementImage = "/static/img/FirstSell.png";
+    const bought = {{bought}}
+    const sold = {{sold}}
+    if (bought > 0) {
+        document.getElementById('bought').innerHTML = `<img src="${boughtAchievementImage}" alt="Bought Achievement" />`;
+    }
+    if (sold > 0) {
+        document.getElementById('sold').innerHTML = `<img src="${soldAchievementImage}" alt="Sold Achievement" />`;
+    }
+
+    else if (bought == 0 && sold == 0 )
+    {
+        document.getElementById('none').innerHTML = "Sorry! You have no achievements at the moment. Try playing around with the website a bit to gain some!"
+    }
+</script>
+{% endblock %}

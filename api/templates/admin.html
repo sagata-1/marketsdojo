@@ -1,0 +1,197 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+<style>
+    #custom-alert-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000; /* Ensure it's above other content */
+        width: 40%;
+        max-width: 600px;
+        max-height: 80vh; /* Maximum height */
+        box-sizing: border-box;
+        overflow-y: auto; /* Vertical scrolling */
+        overflow-x: hidden; /* Hide horizontal scrollbar */
+    }
+    </style>
+    
+<div class="container-fluid text-center rounded p-4 shado opacity-75">
+    <div><h1 class="text-light">Welcome, {{username}}!</h1></div>
+    <!-- <div><h3 class="text-light">NLP Based Search- Ask your finance questions now!</h3></div> -->
+    <br>
+    <div id="custom-alert-box" style="display: none;">
+        <!-- Dynamic content will be added here -->
+    </div>
+    <div class="d-flex justify-content-xl-center justify-content-lg-center justify-content-md-center justify-content-sm-center container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
+        <form action="/admin" method="post">
+            <div>
+                <button class="btn btn-primary" type="submit" id="create-course-btn">Create New Course</button>
+            </div>
+        </form>
+        <br>
+    </div>
+    <br><br>
+    <div class="d-flex flex-wrap justify-content-xl-between justify-content-lg-between justify-content-md-between justify-content-sm-between container-fluid flex-sm-column flex-xl-row flex-lg-row flex-md-row flex-column">
+        <form action="/adminlearn" method="get" class="mb-3">
+            <div>
+                <button class="btn btn-primary" type="submit">Beginner Course 1</button>
+            </div>
+        </form>
+        {% for name in courses %}
+            <form action="/adminupdate" method="get" class="mb-3">
+                <div>
+                    <input type=hidden name="course" value="{{name}}">
+                    <button class="btn btn-primary" type="submit">{{name}}</button>
+                </div>
+            </form>
+        {% endfor %}
+    </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const createCourseBtn = document.getElementById("create-course-btn");
+            const customAlertBox = document.getElementById("custom-alert-box");
+        
+            createCourseBtn.addEventListener("click", function(event) {
+                event.preventDefault();
+                customAlertBox.innerHTML = ''; 
+                customAlertBox.style.display = 'block'; 
+                createModuleInputForm();
+            });
+        
+            function createModuleInputForm() {
+                modulesCount = parseInt(prompt("Enter the number of modules in the course:"));
+                if (isNaN(modulesCount) || modulesCount <= 0) {
+                    alert("Please enter a valid number of modules.");
+                    customAlertBox.style.display = 'none';
+                    return;
+                }
+        
+                // Course name input
+                let courseNameInput = createTextInput("Course Name", "course-name");
+                customAlertBox.appendChild(courseNameInput);
+        
+                for (let i = 1; i <= modulesCount; i++) {
+                    let moduleInput = createNumberInput(`Number of lessons in Module ${i}`, `module-${i}-count`);
+                    moduleInput.onchange = handleModuleLessonInput; // Attach event handler only here
+                    customAlertBox.appendChild(moduleInput);
+        
+                    // Placeholder for lessons
+                    let lessonContainer = document.createElement("div");
+                    lessonContainer.id = `module-${i}-lessons`;
+                    customAlertBox.appendChild(lessonContainer);
+                }
+        
+                const submitButton = createButton("Create Course", submitCourseData);
+                customAlertBox.appendChild(submitButton);
+            }
+        
+            function handleModuleLessonInput(event) {
+                const moduleId = event.target.id.split('-')[1];
+                const lessonsCount = parseInt(event.target.value);
+        
+                if (isNaN(lessonsCount) || lessonsCount <= 0) {
+                    alert("Please enter a valid number of lessons.");
+                    return;
+                }
+        
+                const lessonContainerId = `module-${moduleId}-lessons`;
+                let lessonContainer = document.getElementById(lessonContainerId);
+                lessonContainer.innerHTML = ''; // Clear previous lesson inputs
+        
+                for (let i = 1; i <= lessonsCount; i++) {
+                    let lessonInput = createNumberInput(`Number of sub-lessons in Lesson ${i} of Module ${moduleId}`, `module-${moduleId}-lesson-${i}`);
+                    lessonContainer.appendChild(lessonInput);
+                }
+            }
+        
+            function createTextInput(placeholder, id) {
+                let input = document.createElement("input");
+                input.type = "text";
+                input.placeholder = placeholder;
+                input.id = id;
+                return input;
+            }
+        
+            function createNumberInput(placeholder, id) {
+                let input = document.createElement("input");
+                input.type = "number";
+                input.placeholder = placeholder;
+                input.id = id;
+                return input;
+            }
+        
+            function createButton(text, onclickFunction) {
+                let button = document.createElement("button");
+                button.textContent = text;
+                button.onclick = onclickFunction;
+                return button;
+            }
+        
+            function submitCourseData() {
+                const courseName = document.getElementById("course-name").value;
+                const form = createForm('/admin', 'POST');
+                appendHiddenInput(form, 'courseName', courseName);
+            
+                // Get the number of modules
+                let numModules = modulesCount; // Assuming 'modulesCount' is already defined
+                appendHiddenInput(form, 'numModules', numModules);
+            
+                for (let moduleId = 1; moduleId <= numModules; moduleId++) {
+                    const lessonsCountInput = document.getElementById(`module-${moduleId}-count`);
+                    if (lessonsCountInput) {
+                        const lessonsCount = parseInt(lessonsCountInput.value);
+            
+                        for (let lessonNum = 1; lessonNum <= lessonsCount; lessonNum++) {
+                            const subLessonsCountInput = document.getElementById(`module-${moduleId}-lesson-${lessonNum}`);
+                            if (subLessonsCountInput) {
+                                const subLessonsCount = parseInt(subLessonsCountInput.value);
+            
+                                for (let subLessonNum = 1; subLessonNum <= subLessonsCount; subLessonNum++) {
+                                    const subLessonKey = `module-${moduleId}-lesson-${lessonNum}-part-${subLessonNum}`;
+                                    appendHiddenInput(form, subLessonKey, ''); // Empty string for sub-lesson value
+                                }
+                            }
+                        }
+                    }
+                }
+            
+                document.body.appendChild(form);
+                form.submit();
+            }
+            
+        
+            function createForm(action, method) {
+                let form = document.createElement("form");
+                form.action = action;
+                form.method = method;
+                return form;
+            }
+        
+            function appendHiddenInput(form, name, value) {
+                let input = document.createElement("input");
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                form.appendChild(input);
+            }
+        });
+        </script>
+        
+        
+        
+        
+        
+        
+{% endblock %}

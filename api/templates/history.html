@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid bg-dark text-center rounded p-4 shado opacity-75 table-responsive-sm">
+    <table class="table table-dark table-hover">
+        <thead>
+            <tr>
+                <th class="text-start">Symbol</th>
+                <th class="text-start">Shares</th>
+                <th class="text-end">Price At Transaction</th>
+                <th class="text-end">Transacted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in history %}
+                <tr>
+                    <td class="text-start">{{stock.stock_symbol}}</td>
+                    <td class="text-end">{{stock.num_shares}}</td>
+                    <td class="text-end">{{stock.price | usd}}</td>
+                    <td class="text-end">{{stock.time_of_transaction}}</td>
+                </tr>
+            {% endfor %}
+
+    </tbody>
+    </table>
+</div>
+<br>
+<div class="d-flex justify-content-between container-fluid flex-sm-column flex-xl-row flex-lg-column flex-md-column flex-column opacity-75">
+    <div width=40%>
+        <img src="static/img/pl.png" alt="Average performance of top performing assets" width=auto height=auto class="container-fluid">
+    </div>
+    <div class="bg-dark text-center rounded p-4 shadow opacity-75">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="mb-0 text-light">Example Advertisement</h6>
+        </div>
+        <div>
+            <img src="static/img/ad.png" alt="Average performance of top performing assets" width=auto height=auto>
+        </div>
+    </div>
+            <div class="bg-dark text-center rounded p-4 shadow opacity-75">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0 text-light">Leaderboard</h6>
+                    <div>
+                        <select class="form-select" aria-label="Default select example">
+                            <option selected>This Month</option>
+                            <option value="1">Last Month</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- <canvas id="worldwide-sales"></canvas> -->
+                <!-- <img src="static/img/feed.png" alt="Market Feed" class="container-fluid"> -->
+                <div class="container-fluid bg-dark text-center rounded p-4 shado">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Position</th>
+                                <th class="text-start">Username</th>
+                                <th class="text-end">Current Portfolio worth</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in range(size) %}
+                                <tr>
+                                    <td class="text-start">{{i + 1}}</td>
+                                    <td class="text-end">{{usernames[i].username}}</td>
+                                    <td class="text-end">{{usernames[i].total | usd}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+<svg id="ic_filter" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <rect id="Rectangle_3219" data-name="Rectangle 3219" width="24" height="24" rx="6" fill="#fff" opacity="0.002"/>
+  <g id="_15_Chat" data-name="15 Chat" transform="translate(5.27 6.176)">
+    <path id="Path_58673" data-name="Path 58673" d="M13.231,117.07H1.755a.755.755,0,1,1,0-1.51H13.232a.755.755,0,1,1,0,1.51Z" transform="translate(-1 -114.199)" fill="#444" stroke="#f6f6fa" stroke-width="0.2"/>
+    <path id="Path_58675" data-name="Path 58675" d="M221.661,347.95H210.185a.755.755,0,1,1,0-1.51h11.476a.755.755,0,1,1,0,1.51Z" transform="translate(-209.429 -337.896)" fill="#444" stroke="#f6f6fa" stroke-width="0.2"/>
+    <path id="Path_58682" data-name="Path 58682" d="M66.2,270.17a2.116,2.116,0,1,0,2.115,2.116A2.116,2.116,0,0,0,66.2,270.17Z" transform="translate(-61.35 -263.043)" fill="#444"/>
+    <path id="Path_58683" data-name="Path 58683" d="M66.2,270.17a2.116,2.116,0,1,0,2.115,2.116A2.116,2.116,0,0,0,66.2,270.17Z" transform="translate(-57.769 -270.17)" fill="#444"/>
+  </g>
+</svg>

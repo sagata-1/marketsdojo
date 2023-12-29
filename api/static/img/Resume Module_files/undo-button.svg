@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <g id="ic_redo" transform="translate(-767 -53)">
+    <rect id="Rectangle" width="24" height="24" rx="5" transform="translate(767 53)" fill="rgba(238,238,238,0)"/>
+    <path id="undo_1_" data-name="undo (1)" d="M4.538,10.882a.672.672,0,0,0,.947-.954L3.235,7.719H7.694a5.373,5.373,0,0,1,5.373,5.373v1.343a.672.672,0,0,0,1.343,0V13.091A6.716,6.716,0,0,0,7.694,6.376H3.248l2.23-2.209a.672.672,0,0,0-.94-.954L1.133,6.57a.672.672,0,0,0,0,.954Z" transform="translate(771.361 55.893)" fill="#444" stroke="#444" stroke-width="1"/>
+  </g>
+</svg>

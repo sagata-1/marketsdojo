@@ -1,0 +1,902 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    .flex-container {
+        display:flex;
+        height: 100vh;
+    }
+
+    article *:not(h1):not(iframe) {
+        text-align: left;
+    }
+    
+    iframe {
+        text-align: center;
+    }
+    
+    .sidebar {
+        width: 250px;
+        background-color: #f3f3f3;
+        padding: 20px;
+        height: 100%;
+        overflow: auto;
+    }
+    
+    .module {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .lesson {
+        cursor: pointer;
+        padding: 10px;
+        background-color: #ddd;
+        margin-bottom: 5px;
+    }
+    
+    .sub-lessons {
+        display: none;
+        padding-left: 20px;
+    }
+    
+    .sub-lesson {
+        padding: 5px;
+        cursor: pointer;
+    }
+    
+    .main-content {
+        flex-grow: 1;
+        padding:0px;
+        height: 100%;
+        overflow-y: auto;
+    }
+    
+    article {
+        max-width: 1650px;
+        width: 100%; 
+        overflow-y: auto; 
+        overflow-x: hidden;
+        background-color: #f3f3f3;
+        padding: 20px;
+        border: 1px solid #f3f3f3;
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    .module-button-container {
+        background-color: #f3f3f3;
+        width: 100%;
+        text-align: center;
+        padding: 20px 0;
+        display: flex; /* Use flexbox */
+        flex-direction: column; /* Stack children vertically */
+        align-items: center; /* Center align children horizontally */
+    }
+    
+    #visitModuleBtn {
+        padding: 10px 20px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .progress-bar {
+        width: 0%;
+        height: 20px;
+        background-color: green;
+        text-align: center;
+        line-height: 20px;
+        color: white;
+        transition: width 2s ease;
+    }
+    
+    
+    
+</style>
+<div><div id="totalProgress" class="progress-bar"></div></div>
+<div id="mod_1" class="module-button-container">
+    <h1>Module 1- Introduction to trading</h1>
+    <button id="visitModuleBtn">Visit Module 1</button>
+    <br><br>
+    <div id="container" style="width: 100px; height: 100px;"></div>     
+</div>
+<br id="rm_1" style="display:none">
+<div id="mod_2" class="module-button-container">
+    <h1>Module 2- Introduction to Asset Classes</h1>
+    <button id="visitModuleBtn_2">Visit Module 2</button>
+    <br><br>
+    <div id="container_2" style="width: 100px; height: 100px;"></div>  
+</div>
+<br id="rm_2" style="display:none">
+<div id="mod_3" class="module-button-container">
+    <h1>Module 3- Fundamental Analysis</h1>
+    <button id="visitModuleBtn_3">Visit Module 3</button>
+    <br><br>
+    <div id="container_3" style="width: 100px; height: 100px;"></div>    
+</div>
+<br id="rm_3" style="display:none">
+<div id="mod_4" class="module-button-container">
+    <h1>Module 4- Technical Analysis Intro</h1>
+    <button id="visitModuleBtn_4">Visit Module 4</button>
+    <br><br>
+    <div id="container_4" style="width: 100px; height: 100px;"></div>   
+</div>
+<br id="rm_4" style="display:none">
+<div id="mod_5" class="module-button-container">
+    <h1>Module 5- Risk and Return</h1>
+    <button id="visitModuleBtn_5">Visit Module 5</button>
+    <br><br>
+    <div id="container_5" style="width: 100px; height: 100px;"></div>    
+</div>
+<br id="rm_5" style="display:none">
+<div id="mod_6" class="module-button-container">
+    <h1>Module 6- Derivatives</h1>
+    <button id="visitModuleBtn_6">Visit Module 6</button>
+    <br><br>
+    <div id="container_6" style="width: 100px; height: 100px;"></div>    
+</div>
+<div id="module_1" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 1- Introduction to Trading</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 1- Motivation to Invest
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article-1-1">Sub Lesson 1.1</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="1">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 2- Understanding Financial Markets
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article-2-1">Sub Lesson 2.1</div>
+                    <div class="sub-lesson" data-article-id="article-2-2">Sub Lesson 2.2</div>
+                    <div class="sub-lesson" data-article-id="article-2-3">Sub Lesson 2.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="1">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 3- Interest
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article-3-1">Sub Lesson 3.1</div>
+                    <div class="sub-lesson" data-article-id="article-3-2">Sub Lesson 3.2</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="1">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 4- Basics Of the Stock Market
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article-4-1">Sub Lesson 4.1</div>
+                    <div class="sub-lesson" data-article-id="article-4-2">Sub Lesson 4.2</div>
+                    <div class="sub-lesson" data-article-id="article-4-3">Sub Lesson 4.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="1">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 1! This is Lesson 1 Part 1</h1><ol><li><strong>Capital Appreciation:</strong><ul><li><strong>Investing:</strong> By allocating funds to assets like stocks, real estate, or mutual funds, individuals can benefit from capital appreciation as the value of these assets increases over time.</li><li><strong>Trading:</strong> Traders aim to profit from short-term price movements in financial instruments, seeking capital appreciation through buying and selling at opportune times.</li></ul></li><li><strong>Income Generation:</strong><ul><li><strong>Investing:</strong> Some investments, such as dividend-paying stocks or bonds, can generate regular income in the form of dividends or interest payments.</li><li><strong>Trading:</strong> Traders may also generate income through strategies like day trading or options trading.</li></ul></li><li><strong>Portfolio Diversification:</strong><ul><li><strong>Investing:</strong> Diversifying a portfolio with a mix of assets helps spread risk and reduce exposure to the performance of a single asset class.</li><li><strong>Trading:</strong> Traders may diversify their strategies and positions to manage risk effectively in various market conditions.</li></ul></li><li><strong>Long-Term Wealth Accumulation:</strong><ul><li><strong>Investing:</strong> Long-term investors benefit from the compounding of returns over time, allowing wealth to accumulate as earnings generate additional earnings.</li><li><strong>Trading:</strong> While trading is often associated with shorter time frames, some traders adopt a more strategic, longer-term approach to accumulate wealth.</li></ul></li><li><strong>Hedging Against Inflation:</strong><ul><li><strong>Investing:</strong> Certain investments, like real estate or commodities, can act as a hedge against inflation, preserving and potentially growing wealth as the cost of living increases.</li><li><strong>Trading:</strong> Traders may use strategies to navigate market conditions influenced by inflationary pressures.</li></ul></li><li><strong>Retirement Planning:</strong><ul><li><strong>Investing:</strong> Retirement accounts, such as 401(k)s or IRAs, allow individuals to invest in a tax-advantaged manner, building wealth over their working years to support retirement.</li><li><strong>Trading:</strong> While active trading might be less common in retirement planning, strategically managing investments over time can enhance retirement savings.</li></ul></li><li><strong>Wealth Preservation and Succession:</strong><ul><li><strong>Investing:</strong> Well-chosen investments can preserve wealth for future generations, serving as a legacy for heirs.</li><li><strong>Trading:</strong> Some traders incorporate long-term investment strategies as part of wealth preservation planning.</li></ul></li><li><strong>Financial Independence:</strong><ul><li><strong>Investing:</strong> Consistent and disciplined investing can contribute to financial independence, allowing individuals to achieve their financial goals and maintain a comfortable lifestyle.</li><li><strong>Trading:</strong> Successful trading can also lead to financial independence, although it often requires a high level of skill, knowledge, and discipline.</li></ul></li></ol><p>In summary, both investing and trading can be powerful tools for building wealth, but they come with different time horizons, risk profiles, and strategies. The key is for individuals to align their approach with their financial goals, risk tolerance, and time horizon. It's often beneficial to have a diversified approach that incorporates both investing and trading strategies.<br><br><br></p>
+            <iframe width="420" height="315"
+src="https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h" title="YouTube video player" allowfullscreen>
+
+        </iframe>
+        </article>
+    </div>
+</div>
+<div id="module_2" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 2- Introduction to Asset Classes</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 5
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article2-5-1">Sub Lesson 5.1</div>
+                    <div class="sub-lesson" data-article-id="article2-5-2">Sub Lesson 5.2</div>
+                    <div class="sub-lesson" data-article-id="article2-5-3">Sub Lesson 5.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="2">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 6
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article2-6-1">Sub Lesson 6.1</div>
+                    <div class="sub-lesson" data-article-id="article2-6-2">Sub Lesson 6.2</div>
+                    <div class="sub-lesson" data-article-id="article2-6-3">Sub Lesson 6.3</div>
+                    <div class="sub-lesson" data-article-id="article2-6-4">Sub Lesson 6.4</div>
+                    <div class="sub-lesson" data-article-id="article2-6-5">Sub Lesson 6.5</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="2">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 7
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article2-7-1">Sub Lesson 7.1</div>
+                    <div class="sub-lesson" data-article-id="article2-7-2">Sub Lesson 7.2</div>
+                    <div class="sub-lesson" data-article-id="article2-7-3">Sub Lesson 7.3</div>
+                    <div class="sub-lesson" data-article-id="article2-7-4">Sub Lesson 7.4</div>
+                    <div class="sub-lesson" data-article-id="article2-7-5">Sub Lesson 7.5</div>
+                    <div class="sub-lesson" data-article-id="article2-7-6">Sub Lesson 7.6</div>
+                    <div class="sub-lesson" data-article-id="article2-7-7">Sub Lesson 7.7</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="2">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_2">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 2! This is Lesson 5 Part 1</h1><p>Content for Sub-Lesson 5.1
+            </p>
+        </article>
+    </div>
+</div>
+<div id="module_3" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 3- Fundamental Analysis</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 8
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article3-8-1">Sub Lesson 8.1</div>
+                    <div class="sub-lesson" data-article-id="article3-8-2">Sub Lesson 8.2</div>
+                    <div class="sub-lesson" data-article-id="article3-8-3">Sub Lesson 8.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="3">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 9
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article3-9-1">Sub Lesson 9.1</div>
+                    <div class="sub-lesson" data-article-id="article3-9-2">Sub Lesson 9.2</div>
+                    <div class="sub-lesson" data-article-id="article3-9-3">Sub Lesson 9.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="3">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_3">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 3! This is Lesson 8 Part 1- A Beginner's Guide To Fundamental Analysis</h1><p>In the world of investing, understanding the market changes might seem complex, but fear not, bold investor, for a powerful tool lies at your disposal: fundamental analysis. This analytical approach delves deep into the inner workings of a company, scrutinizing its finances, operations, and competitive landscape to determine its true worth. By mastering this skill, you'll gain the confidence to make informed investment decisions, potentially leading to long-term success. So, buckle up and get ready to embark on a learning journey.<br>Core Concepts:<br>At its heart, fundamental analysis boils down to one key objective: assessing a company's intrinsic value. This &quot;true value&quot; goes beyond the fluctuations of the market price, offering a glimpse into the company's long-term potential. Think of it like appraising a house. You wouldn't simply base your offer on the paint color or the curtains, would you? Instead, you'd delve into the property's structural integrity, location, and potential for appreciation. Similarly, fundamental analysis digs beneath the surface of a company's stock price to uncover its true worth.<br>To effectively assess a company's intrinsic value, fundamental analysts employ a diverse range of tools:<br>• Financial Statements: These are the holy grail of fundamental analysis, offering a detailed snapshot of a company's financial health. The Income Statement, Balance Sheet, and Cash Flow Statement provide insights into a company's earnings, assets, liabilities, and cash flow. In upcoming lessons, we will discuss the big three trio.<br>• Ratio Analysis: By calculating ratios such as the Price-to-Earnings (P/E) ratio or the Debt-to-Equity (D/E) ratio, analysts gain valuable insights into a company's valuation, profitability, and solvency.<br>• Industry Research: Understanding the competitive landscape within a company's industry is crucial. Factors such as market size, growth potential, and key competitors all play a role in shaping a company's future prospects.<br>• News and Events: Staying updated on company-specific news, industry trends, and macroeconomic factors is essential for making informed investment decisions.<br>The Fundamental Analysis Framework:<br>Now that you're familiar with the key tools, let's explore the step-by-step framework for conducting fundamental analysis:<br>1. Define Your Investment Goals: Are you seeking long-term growth or income? Knowing your investment goals will guide your analysis and help you identify suitable companies.<br>2. Choose Your Target Company: Research potential companies within your chosen sector or industry. Market share, competitive advantages, and management expertise should be considered.<br>3. Analyze the Financial Statements: Scrutinize the company's financial statements, paying close attention to revenue growth, profitability margins, and debt levels. Use ratio analysis to gain further insights.<br>4. Assess the Competitive Landscape: Research the company's main competitors, their market share, and their respective strengths and weaknesses.<br>5. Macroeconomic Factors: Evaluate the impact of broader economic trends, regulatory changes, and industry-specific developments on the company's prospects.<br>6. Formulate Your Investment Thesis: Based on your analysis, form a well-reasoned opinion on the company's intrinsic value and its potential for future growth. This will guide your investment decision to buy, hold, or sell.<br>Embracing the Challenge: Mastering fundamental analysis takes time, dedication, and a thirst for knowledge. But the rewards can be substantial, empowering you to make informed investment decisions to navigate the market with confidence. By diligently applying the principles of fundamental analysis, you can transform from a passive observer of the market into an active participant and shape your own investment future. Fundamental analysis is an ongoing process, not a one-time event. It's important to regularly reassess your investment thesis with changing market conditions. So, embrace the challenge, hone your analytical skills, and unlock the secrets of the financial world!</p>
+        </article>
+    </div>
+</div>
+<div id="module_4" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 4- Technical Analysis Intro</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 10
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article4-10-1">Sub Lesson 10.1</div>
+                    <div class="sub-lesson" data-article-id="article4-10-2">Sub Lesson 10.2</div>
+                    <div class="sub-lesson" data-article-id="article4-10-3">Sub Lesson 10.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="4">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 11
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article4-11-1">Sub Lesson 11.1</div>
+                    <div class="sub-lesson" data-article-id="article4-11-2">Sub Lesson 11.2</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="4">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_4">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 4! This is Lesson 13 Part 1</h1><p>Content for Sub-Lesson 13.1</p>
+        </article>
+    </div>
+</div>
+<div id="module_5" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 5- Risk and Return</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 12
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article5-12-1">Sub Lesson 12.1</div>
+                    <div class="sub-lesson" data-article-id="article5-12-2">Sub Lesson 12.2</div>
+                    <div class="sub-lesson" data-article-id="article5-12-3">Sub Lesson 12.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="5">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 13
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article5-13-1">Sub Lesson 13.1</div>
+                    <div class="sub-lesson" data-article-id="article5-13-2">Sub Lesson 13.2</div>
+                    <div class="sub-lesson" data-article-id="article5-13-3">Sub Lesson 13.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="5">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_5">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 5! This is Lesson 12 Part 1</h1><p>Content for Sub-Lesson 12.1
+            </p>
+        </article>
+    </div>
+</div>
+<div id="module_6" class="flex-container" style="display:none">
+    <div class="sidebar">
+        <div class="module">Module 6- Derivatives</div>
+        <div class="lessons">
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 14
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article6-14-1">Sub Lesson 14.1</div>
+                    <div class="sub-lesson" data-article-id="article6-14-2">Sub Lesson 14.2</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="6">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 15
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article6-15-1">Sub Lesson 15.1</div>
+                    <div class="sub-lesson" data-article-id="article6-15-2">Sub Lesson 15.2</div>
+                    <div class="sub-lesson" data-article-id="article6-15-3">Sub Lesson 15.3</div>
+                    <div class="sub-lesson" data-article-id="article6-15-4">Sub Lesson 15.4</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="6">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 16
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article6-16-1">Sub Lesson 16.1</div>
+                    <div class="sub-lesson" data-article-id="article6-16-2">Sub Lesson 16.2</div>
+                    <div class="sub-lesson" data-article-id="article6-16-3">Sub Lesson 16.3</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="6">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="lesson" onclick="toggleSubLessons(this)">
+                Lesson 17
+                <div class="sub-lessons">
+                    <div class="sub-lesson" data-article-id="article6-17-1">Sub Lesson 17.1</div>
+                    <div class="sub-lesson" data-article-id="article6-17-2">Sub Lesson 17.2</div>
+                    <div class="sub-lesson" data-article-id="article6-17-3">Sub Lesson 17.3</div>
+                    <div class="sub-lesson" data-article-id="article6-17-4">Sub Lesson 17.4</div>
+                    <div class="sub-lesson" data-article-id="article6-17-5">Sub Lesson 17.5</div>
+                    <div class="sub-lesson" data-article-id="article6-17-6">Sub Lesson 17.6</div>
+                    <div class="sub-lesson" data-article-id="article6-17-7">Sub Lesson 17.7</div>
+                    <form action="/update" method="post">
+                        <input type="hidden" name="complete" value="6">
+                        <button type=submit>Complete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="module-button-container">
+                <button id="goBack_6">Back To Modules</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <article>
+            <h1>Welcome to Module 6! This is Lesson 14 Part 1</h1><p>Content for Sub-Lesson 14.1
+            </p>
+        </article>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/1.1.0/progressbar.min.js"></script>
+<script>
+    // Functions for progress tracking animation
+    // Progress tracking for total progress front-end
+    function animateProgress(element, targetProgress) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < targetProgress) {
+                progress++;
+                element.style.width = progress + '%';
+                element.textContent = progress + '%';
+            } else {
+                clearInterval(interval);
+            }
+        }, 10);
+    }
+    
+    function animateCircularChart(chartId, targetProgress) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < targetProgress) {
+                progress++;
+                updateCircularChart(chartId, progress);
+            } else {
+                clearInterval(interval);
+            }
+        }, 10);
+    }
+    
+    
+    //console.log(prog)
+    // Progress tracking per module 
+    let totprog = 0.3
+    
+    animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    var bar = new ProgressBar.Circle('#container', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_2 = new ProgressBar.Circle('#container_2', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_3 = new ProgressBar.Circle('#container_3', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_4 = new ProgressBar.Circle('#container_4', {
+        strokeWidth: 6,
+        color: 'green', // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_5 = new ProgressBar.Circle('#container_5', {
+        strokeWidth: 6,
+        color: "green", // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+
+    var bar_6 = new ProgressBar.Circle('#container_6', {
+        strokeWidth: 6,
+        color: "green", // Green color
+        trailColor: '#eee',
+        trailWidth: 1,
+        duration: 1400,
+        easing: 'easeInOut',
+        text: {
+            autoStyleContainer: true
+          },
+          from: { color: '#FFEA82', width: 1 },
+          to: { color: '#ED6A5A', width: 6 },
+          step: function(state, bar) {
+            bar.setText(Math.round(bar.value() * 100) + ' %' + " Complete");
+          }
+    });
+    
+    // Update the progress bar
+    let mod1p = 0.1;
+    let mod2p = 0.1;
+    let mod3p = 0;
+    let mod4p = 0.2;
+    let mod5p = 0.3;
+    let mod6p = 0.2;
+    bar.animate(mod1p);
+    bar_2.animate(mod2p);
+    bar_3.animate(mod3p);
+    bar_4.animate(mod4p);
+    bar_5.animate(mod5p);
+    bar_6.animate(mod6p);
+    
+    
+    document.getElementById('visitModuleBtn').addEventListener('click', function() {
+        document.querySelector('#module_1').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod1p * 100);
+    });
+
+    document.getElementById('goBack').addEventListener('click', function() {
+        document.querySelector('#module_1').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = '';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none'; 
+        document.getElementById("rm_5").style.display ='none'; 
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_2').addEventListener('click', function() {
+        document.querySelector('#module_2').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod2p * 100);
+    });
+
+    document.getElementById('goBack_2').addEventListener('click', function() {
+        document.querySelector('#module_2').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = ''; 
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_3').addEventListener('click', function() {
+        document.querySelector('#module_3').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod3p * 100);
+    });
+
+    document.getElementById('goBack_3').addEventListener('click', function() {
+        document.querySelector('#module_3').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = '';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_4').addEventListener('click', function() {
+        document.querySelector('#module_4').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod4p * 100);
+    });
+
+    document.getElementById('goBack_4').addEventListener('click', function() {
+        document.querySelector('#module_4').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = '';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_5').addEventListener('click', function() {
+        document.querySelector('#module_5').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_6").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod5p * 100);
+    });
+
+    document.getElementById('goBack_5').addEventListener('click', function() {
+        document.querySelector('#module_5').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = ''; 
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+
+    document.getElementById('visitModuleBtn_6').addEventListener('click', function() {
+        document.querySelector('#module_6').style.display = 'flex'; // Show the flex-container
+        this.parentElement.style.display = 'none'; // Hide the module button container
+        document.getElementById("mod_1").style.display ='none';
+        document.getElementById("mod_2").style.display ='none';
+        document.getElementById("mod_3").style.display ='none';
+        document.getElementById("mod_4").style.display ='none';
+        document.getElementById("mod_5").style.display ='none';
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), mod6p * 100);
+    });
+
+    document.getElementById('goBack_6').addEventListener('click', function() {
+        document.querySelector('#module_6').style.display = 'none'; // Show the flex-container
+        document.getElementById('visitModuleBtn').parentElement.style.display = '';
+        document.getElementById('visitModuleBtn_2').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_3').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_4').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_5').parentElement.style.display = ''; 
+        document.getElementById('visitModuleBtn_6').parentElement.style.display = ''; 
+        document.getElementById("rm_1").style.display ='none';
+        document.getElementById("rm_2").style.display ='none';
+        document.getElementById("rm_3").style.display ='none';
+        document.getElementById("rm_4").style.display ='none';
+        document.getElementById("rm_5").style.display ='none';
+        animateProgress(document.getElementById('totalProgress'), totprog * 100);
+    });
+    const articleContents = {
+        "article-1-1": "<h1>Welcome to Module 1! This is Lesson 1 Part 1</h1><ol><li><strong>Capital Appreciation:</strong><ul><li><strong>Investing:</strong> By allocating funds to assets like stocks, real estate, or mutual funds, individuals can benefit from capital appreciation as the value of these assets increases over time.</li><li><strong>Trading:</strong> Traders aim to profit from short-term price movements in financial instruments, seeking capital appreciation through buying and selling at opportune times.</li></ul></li><li><strong>Income Generation:</strong><ul><li><strong>Investing:</strong> Some investments, such as dividend-paying stocks or bonds, can generate regular income in the form of dividends or interest payments.</li><li><strong>Trading:</strong> Traders may also generate income through strategies like day trading or options trading.</li></ul></li><li><strong>Portfolio Diversification:</strong><ul><li><strong>Investing:</strong> Diversifying a portfolio with a mix of assets helps spread risk and reduce exposure to the performance of a single asset class.</li><li><strong>Trading:</strong> Traders may diversify their strategies and positions to manage risk effectively in various market conditions.</li></ul></li><li><strong>Long-Term Wealth Accumulation:</strong><ul><li><strong>Investing:</strong> Long-term investors benefit from the compounding of returns over time, allowing wealth to accumulate as earnings generate additional earnings.</li><li><strong>Trading:</strong> While trading is often associated with shorter time frames, some traders adopt a more strategic, longer-term approach to accumulate wealth.</li></ul></li><li><strong>Hedging Against Inflation:</strong><ul><li><strong>Investing:</strong> Certain investments, like real estate or commodities, can act as a hedge against inflation, preserving and potentially growing wealth as the cost of living increases.</li><li><strong>Trading:</strong> Traders may use strategies to navigate market conditions influenced by inflationary pressures.</li></ul></li><li><strong>Retirement Planning:</strong><ul><li><strong>Investing:</strong> Retirement accounts, such as 401(k)s or IRAs, allow individuals to invest in a tax-advantaged manner, building wealth over their working years to support retirement.</li><li><strong>Trading:</strong> While active trading might be less common in retirement planning, strategically managing investments over time can enhance retirement savings.</li></ul></li><li><strong>Wealth Preservation and Succession:</strong><ul><li><strong>Investing:</strong> Well-chosen investments can preserve wealth for future generations, serving as a legacy for heirs.</li><li><strong>Trading:</strong> Some traders incorporate long-term investment strategies as part of wealth preservation planning.</li></ul></li><li><strong>Financial Independence:</strong><ul><li><strong>Investing:</strong> Consistent and disciplined investing can contribute to financial independence, allowing individuals to achieve their financial goals and maintain a comfortable lifestyle.</li><li><strong>Trading:</strong> Successful trading can also lead to financial independence, although it often requires a high level of skill, knowledge, and discipline.</li></ul></li></ol><p>In summary, both investing and trading can be powerful tools for building wealth, but they come with different time horizons, risk profiles, and strategies. The key is for individuals to align their approach with their financial goals, risk tolerance, and time horizon. It's often beneficial to have a diversified approach that incorporates both investing and trading strategies.</p><iframe width='420' height='315' src='https://www.youtube.com/embed/O8AN53JRyuQ?si=9xbUfkTyRLtU7l-h' title='YouTube video player' allowfullscreen></iframe>",
+        "article-2-1": "<h1>Welcome to Module 1! This is Lesson 2 Part 1</h1><p>Content for Sub Lesson 2.1</p>",
+        "article-2-2": "<h1>Welcome to Module 1! This is Lesson 2 Part 2</h1><p>Content for Sub Lesson 2.2</p>",
+        "article-2-3": "<h1>Welcome to Module 1! This is Lesson 2 Part 3</h1><p>Content for Sub Lesson 2.3</p>",
+        "article-3-1": "<h1>Welcome to Module 1! This is Lesson 3 Part 1</h1><p>Content for Sub Lesson 3.1</p>",
+        "article-3-2": "<h1>Welcome to Module 1! This is Lesson 3 Part 2</h1><p>Content for Sub Lesson 3.2</p>",
+        "article-4-1": "<h1>Welcome to Module 1! This is Lesson 4 Part 1</h1><p>Content for Sub Lesson 4.1</p>",
+        "article-4-2": "<h1>Welcome to Module 1! This is Lesson 4 Part 2</h1><p>Content for Sub Lesson 4.2</p>",
+        "article-4-3": "<h1>Welcome to Module 1! This is Lesson 4 Part 3</h1><p>Content for Sub Lesson 4.3</p>",
+        "article2-5-1": "<h1>Welcome to Module 2! This is Lesson 5 Part 1</h1><p>Content for Sub Lesson 5.1</p>",
+        "article2-5-2": "<h1>Welcome to Module 2! This is Lesson 5 Part 2</h1><p>Content for Sub Lesson 5.2</p>",
+        "article2-5-3": "<h1>Welcome to Module 2! This is Lesson 5 Part 3</h1><p>Content for Sub Lesson 5.3</p>",
+        "article2-6-1": "<h1>Welcome to Module 2! This is Lesson 6 Part 1</h1><p>Content for Sub Lesson 6.1</p>",
+        "article2-6-2": "<h1>Welcome to Module 2! This is Lesson 6 Part 2</h1><p>Content for Sub Lesson 6.2</p>",
+        "article2-6-3": "<h1>Welcome to Module 2! This is Lesson 6 Part 3</h1><p>Content for Sub Lesson 6.3</p>",
+        "article2-6-4": "<h1>Welcome to Module 2! This is Lesson 6 Part 4</h1><p>Content for Sub Lesson 6.4</p>",
+        "article2-6-5": "<h1>Welcome to Module 2! This is Lesson 6 Part 5</h1><p>Content for Sub Lesson 6.</p>",
+        "article2-7-1": "<h1>Welcome to Module 2! This is Lesson 7 Part 1</h1><p>Content for Sub Lesson 7.1</p>",
+        "article2-7-2": "<h1>Welcome to Module 2! This is Lesson 7 Part 2</h1><p>Content for Sub Lesson 7.2</p>",
+        "article2-7-3": "<h1>Welcome to Module 2! This is Lesson 7 Part 3</h1><p>Content for Sub Lesson 7.3</p>",
+        "article2-7-4": "<h1>Welcome to Module 2! This is Lesson 7 Part 4</h1><p>Content for Sub Lesson 7.4</p>",
+        "article2-7-5": "<h1>Welcome to Module 2! This is Lesson 7 Part 5</h1><p>Content for Sub Lesson 7.5</p>",
+        "article2-7-6": "<h1>Welcome to Module 2! This is Lesson 7 Part 6</h1><p>Content for Sub Lesson 7.6</p>",
+        "article2-7-7": "<h1>Welcome to Module 2! This is Lesson 7 Part 7</h1><p>Content for Sub Lesson 7.7</p>",
+        "article3-8-1": "<h1>Welcome to Module 3! This is Lesson 8 Part 1- A Beginner's Guide To Fundamental Analysis</h1><p>In the world of investing, understanding the market changes might seem complex, but fear not, bold investor, for a powerful tool lies at your disposal: fundamental analysis. This analytical approach delves deep into the inner workings of a company, scrutinizing its finances, operations, and competitive landscape to determine its true worth. By mastering this skill, you'll gain the confidence to make informed investment decisions, potentially leading to long-term success. So, buckle up and get ready to embark on a learning journey.<br>Core Concepts:<br>At its heart, fundamental analysis boils down to one key objective: assessing a company's intrinsic value. This &quot;true value&quot; goes beyond the fluctuations of the market price, offering a glimpse into the company's long-term potential. Think of it like appraising a house. You wouldn't simply base your offer on the paint color or the curtains, would you? Instead, you'd delve into the property's structural integrity, location, and potential for appreciation. Similarly, fundamental analysis digs beneath the surface of a company's stock price to uncover its true worth.<br>To effectively assess a company's intrinsic value, fundamental analysts employ a diverse range of tools:<br>• Financial Statements: These are the holy grail of fundamental analysis, offering a detailed snapshot of a company's financial health. The Income Statement, Balance Sheet, and Cash Flow Statement provide insights into a company's earnings, assets, liabilities, and cash flow. In upcoming lessons, we will discuss the big three trio.<br>• Ratio Analysis: By calculating ratios such as the Price-to-Earnings (P/E) ratio or the Debt-to-Equity (D/E) ratio, analysts gain valuable insights into a company's valuation, profitability, and solvency.<br>• Industry Research: Understanding the competitive landscape within a company's industry is crucial. Factors such as market size, growth potential, and key competitors all play a role in shaping a company's future prospects.<br>• News and Events: Staying updated on company-specific news, industry trends, and macroeconomic factors is essential for making informed investment decisions.<br>The Fundamental Analysis Framework:<br>Now that you're familiar with the key tools, let's explore the step-by-step framework for conducting fundamental analysis:<br>1. Define Your Investment Goals: Are you seeking long-term growth or income? Knowing your investment goals will guide your analysis and help you identify suitable companies.<br>2. Choose Your Target Company: Research potential companies within your chosen sector or industry. Market share, competitive advantages, and management expertise should be considered.<br>3. Analyze the Financial Statements: Scrutinize the company's financial statements, paying close attention to revenue growth, profitability margins, and debt levels. Use ratio analysis to gain further insights.<br>4. Assess the Competitive Landscape: Research the company's main competitors, their market share, and their respective strengths and weaknesses.<br>5. Macroeconomic Factors: Evaluate the impact of broader economic trends, regulatory changes, and industry-specific developments on the company's prospects.<br>6. Formulate Your Investment Thesis: Based on your analysis, form a well-reasoned opinion on the company's intrinsic value and its potential for future growth. This will guide your investment decision to buy, hold, or sell.<br>Embracing the Challenge: Mastering fundamental analysis takes time, dedication, and a thirst for knowledge. But the rewards can be substantial, empowering you to make informed investment decisions to navigate the market with confidence. By diligently applying the principles of fundamental analysis, you can transform from a passive observer of the market into an active participant and shape your own investment future. Fundamental analysis is an ongoing process, not a one-time event. It's important to regularly reassess your investment thesis with changing market conditions. So, embrace the challenge, hone your analytical skills, and unlock the secrets of the financial world!</p>",
+        "article3-8-2": "<h1>Welcome to Module 3! This is Lesson 8 Part 2</h1><p>Financial statements hold a wealth of information about a company's health and performance. For investors, creditors, and even curious employees, understanding these statements can paint a clear picture of the company's financial standing and future prospects. This guide equips you with the tools to form a basic understanding of financial statements and gain valuable insights into any company you choose.<br>Financial statements come in three primary forms, each offering a unique perspective on a company's financial well-being:<br>• Balance Sheet: This snapshot of a company at a specific time point tells you what it owns (assets), what it owes (liabilities), and the value remaining for shareholders (equity). Think of it as a financial photograph of the company's net worth.<br>• Income Statement: This chronological report documents a company's sales and expenses over a period. It tracks every dollar earned and spent, calculating the all-important &quot;net income&quot; figure.<br>• Cash Flow Statement: This statement bridges the gap between the balance sheet and income statement by showcasing how cash moves in and out of the company during a period. It details cash inflows from operations, investing, and financing activities, alongside cash outflows for similar categories.<br>Navigating the Balance Sheet:<br>• Assets: The valuables a company owns, from cash and inventory to equipment and intellectual property. Look for increasing trends in current assets as a sign of liquidity, while rising long-term assets such as equipment, factory, property may indicate future growth plans.<br>• Liabilities: The debts a company owes, including short-term obligations like accounts payable and long-term debts like bank loans. Lower debt-to-equity ratios generally indicate a company's financial stability.<br>• Equity: The owners' stake in the company, calculated as assets minus liabilities. A rising equity level might suggest reinvested profits and potential future dividends for shareholders.<br>• Equation: All must balance using the simple accounting formula, Assets = Liabilities + Shareholders Equity<br>Analyzing the Income Statement:<br>• Revenue: The total amount of money generated from selling goods or services. Track its growth or decline over time to gauge the company's sales performance.<br>• Expenses: The costs incurred to generate revenue, categorized as cost of goods sold, operating expenses, and financial expenses. Analyze expense trends and compare them to revenue to understand profitability.<br>• Net Income: The bottom line, arrived at after deducting all expenses from revenue. This key figure measures the company's profit for the period and is often used to calculate various financial ratios.<br>Decoding the Cash Flow Statement:<br>• Operating Activities: Cash generated or used in the core business operations, including sales, collections, and payments to suppliers. Positive operating cash flow indicates the company can sustain itself without external funding.<br>• Investing Activities: Cash used to buy or sell assets such as property, equipment, or investments. Increased investment activity may signal expansion plans, while consistent sales of assets could raise concerns about asset depletion.<br>• Financing Activities: Cash raised or repaid through borrowing, issuing equity, or paying dividends. Understanding these activities helps assess the company's reliance on external funding and its capital structure.<br>Example: Take a look at Apple’s Financial Statements by navigating the link below. Can you identify the numbers and terms we covered? In our advanced lessons we will dive deeper into the numbers.<br><a style='color:blue' href='https://www.apple.com/newsroom/pdfs/fy2023-q4/FY23_Q4_Consolidated_Financial_Statements.pdf'>https://www.apple.com/newsroom/pdfs/fy2023-q4/FY23_Q4_Consolidated_Financial_Statements.pdf</a><br>Context and Ratios: While understanding the individual line items in each statement is crucial, the real magic happens when you use them to calculate financial ratios. These ratios, such as the debt-to-equity ratio or the price-to-earnings ratio, compare different parts of the financial statements to paint a bigger picture. By comparing these ratios against industry benchmarks or the company's historical performance, you gain valuable insights into its financial health, operational efficiency, and potential for future growth. Financial statements are not infallible. Accounting policies and estimates can introduce complexities. Always consider industry context and external factors when analyzing these statements. Consulting with financial professionals or taking our advance courses can further enhance your understanding and interpretation.<br>Remember: Reading financial statements doesn't have to be a chore. By familiarizing yourself with the key documents, understanding the individual line items, and utilizing financial ratios, you can unlock true value. With practice and patience, you'll be able to confidently navigate the intricacies of financial statements. In our advanced lessons, we'll extensively explore how to interpret financial statements.</p>",
+        "article3-8-3": "<h1>Welcome to Module 3! This is Lesson 8 Part 3- Indicators of Fundamental Analysis</h1><p>Stock prices dances to a complex rhythm and its movements are dictated by number of factors. While technical analysis indicators focus on price action and volume, fundamental analysis indicators focus on company's financial health, industry trends, and economic pulse. Fundamental indicators amplify specific signals and helps investors understand the underlying business. While fundamental analysis doesn't rely solely on indicators, these data-driven tools can validate your assessment of a company's future potential. Here are some key categories:<br>➢ Profitability Measures:<br>o Earnings Per Share (EPS): Indicates how much profit a company earns for each outstanding share.<br>o Return on Equity (ROE): Measures how efficiently a company generates profit from its shareholders' investments.<br>o Gross Margin: Represents the percentage of sales revenue remaining after deducting the cost of goods sold.<br>➢ Efficiency Ratios:<br>o Price-to-Earnings Ratio (P/E): Compares a company's stock price to its annual earnings per share.<br>o Debt-to-Equity Ratio: Measures the financial leverage a company uses, indicating its risk profile.<br>o Current Ratio: Indicates a company's ability to meet its short-term obligations with its current assets.<br>➢ Growth Indicators:<br>o Earnings Growth Rate: Measures the percentage increase in a company's earnings over time.<br>o Price-to-Book Ratio (P/B): Compares a company's stock price to its net asset value.<br>o Revenue Growth Rate: Shows the percentage increase in a company's sales revenue over time.<br>Beyond the Numbers:<br>Just as a single note played out of context offers little to no information, individual indicators cannot tell the whole story. Here's how to make the most of them:<br>• Benchmarking: Compare a company's indicators to its industry peers and historical data to identify trends and relative performance.<br>• Ratio Analysis: Utilize multiple indicators together to paint a richer picture. For example, consider the P/E ratio in conjunction with a company's growth rate to assess its valuation.<br>• Qualitative Factors: Don't neglect qualitative factors such as management quality, competitive advantage, and brand reputation.<br>Now let's see how indicators can be used in different scenarios:<br>➢ Investing in a Growth Stock: You're considering a tech company with a high P/E ratio but also impressive earnings and revenue growth. Analyzing its historical P/E and comparing it to similar companies can offer insights into its potential for continued growth.<br>➢ Evaluating a Value Stock: You're interested in a stock with a low P/E but stagnant earnings. Checking its debt-to-equity ratio and current ratio will help assess its financial stability and liquidity.<br>Remember:<br>Indicators are not crystal balls. They provide valuable information, but market risks and unforeseen events can still impact outcomes. No need to overcomplicate! Choose a few relevant indicators that align with your investment goals and risk tolerance. Track industry trends, economic data, and company-specific news to interpret indicators effectively. Always stay informed!<br>Conclusion:<br>By integrating indicators into your fundamental analysis, you gain a deeper understanding of a company's strengths, weaknesses, and future prospects. Use them wisely, alongside qualitative factors and continuous learning. Remember, in the complex world of the stock market, becoming a skilled investor takes patience and practice.<br>Resources:<br>• The Motley Fool: <a style='color:blue' href='https://www.fool.com/'>https://www.fool.com/</a><br>• Morningstar: <a style='color:blue' href='https://www.morningstar.com/'>https://www.morningstar.com/</a><br>• Financial Times: <a style='color:blue' href='https://www.ft.com/'>https://www.ft.com/</a><br>• Investopedia: <a  style='color:blue' href='https://www.investopedia.com/terms/f/fundamentalanalysis.asp'>https://www.investopedia.com/terms/f/fundamentalanalysis.asp</a></p>",
+        "article3-9-1": "<h1>Welcome to Module 3! This is Lesson 9 Part 1- Valuation Techniques</h1>Understanding how to value equities is a critical skill for investors. Calculating what a company is worth is similar to assessing the value of a car. When you're considering buying a car, you assess various factors such as its make, model, mileage, and condition to determine its worth. Similarly, when investors want to gauge a company's worth, they employ different methods known as equity valuation techniques.<br>One popular approach is the &ldquo;Discounted Cash Flow (DCF) Analysis.&rdquo; Imagine you're buying a used car. You wouldn't just pay whatever the seller asks, right? You'd consider how much the car is worth to you based on its future usefulness. Discounted Cash Flow (DCF) analysis operates similarly, estimating a company's current value by considering its future cash flow generation, the time value of money and risk. This model can help investors calculate a company's intrinsic value by estimating future cash earnings and then converts that future value into today's dollars.<br>Another approach to determine a company's value is through the &ldquo;Multiples Valuation.&rdquo; This model allows investors to evaluate similar businesses in the same industry to see how they're valued by the stock market. If a similar company is valued higher, it might imply that the company you're interested in could also have a higher worth. You can think of it as comparing the price of the car you want to buy with similar cars that have been sold recently.<br>Then there's the &ldquo;Asset-Based Valuation&rdquo; method. Imagine evaluating a used car by tallying up its current market value for all its parts&mdash;the engine, tires, seats, and so on. For companies, this entails assessing all the assets they own, such as buildings, machinery, and cash, and summing them up. This method doesn&rsquo;t solely focus on a company's potential earnings but also considers its tangible assets.<br>The Price-Earnings Ratio (P/E ratio)&quot; serves as a simple measure to understand a company's value. Using the car example, it involves comparing how much you're paying for the car with how much money you can make in a year. Similarly, the P/E ratio compares a company's stock price with its earnings. A high ratio might signify that investors believe the company has strong growth potential.<br>The &ldquo;Book Value&rdquo; is similar to understanding how much the car is worth based on its initial purchase price minus depreciation. For companies, this method involves reviewing the balance sheet and deducting liabilities from assets. It provides an idea of the company's worth if it were to liquidate all its assets.<br>Lastly, the &ldquo;Dividend Discount Model (DDM)&rdquo; is comparable to estimating the future value of your car by considering potential earnings from selling it later. In the business context, this model predicts a company's value by estimating the future dividends it will pay to shareholders and then discounting those values back to the present.<br>These equity valuation techniques serve as tools in an investor's toolbox, allowing them to assess a company's value. Similar to different tools serving distinct purposes for fixing various parts of a car, these methods aid in understanding different aspects of a company's worth. Employing a combination of these methods can offer a more comprehensive and accurate evaluation of a company's potential value.",
+        "article3-9-2": "<h1>Welcome to Module 3! This is Lesson 9 Part 2- Analyzing Company Health</h1><p>Investing can be similar to a rollercoaster ride, but knowing how to pick fundamentally strong companies can make the ride much smoother. It's about understanding the company's &quot;health&quot; meaning its ability to grow, generate profits, and weather market storms. Here's a roadmap to help you analyze and choose investment-worthy businesses:<br>1. Financial Fitness Check:<br>Financial Statements: Dive into the company's balance sheet, income statement, and cash flow statement. These paint a picture of its assets, liabilities, revenue, expenses, and cash flow. Look for key trends: are revenues growing steadily? Is the company managing debt responsibly? Is the company profitable?<br>Ratios: Calculate key ratios such as current ratio, debt-to-equity ratio, and P/E ratio. These tell you about the company's liquidity, solvency, and valuation compared to its peers.<br>Profitability: Look at metrics such as gross margin, operating margin, and net income margin. These reveal how efficiently the company turns revenue into profit.<br>2. Beyond the Numbers:<br>Industry and Market: Understand the industry's growth potential, competitive landscape, and regulatory environment. Is the company a leader in a growing industry?<br>Management and Leadership: Evaluate the leadership team's track record, experience, and vision. Are they skilled and passionate about the company's future?<br>Competitive Advantage: What makes the company unique and defensible against competitors? Does the company have an economic moat? Does it have strong brand recognition, intellectual property, or a cost-effective production process?<br>Corporate Governance: Assess the company's commitment to ethical practices, transparency, and shareholder value. Does it have a strong board of directors and responsible management practices?<br>3. Putting it all together:<br>Compare and Contrast: Benchmark the company's performance against its peers and industry averages. This provides a clearer picture of its relative strength.<br>Look for consistency: Consistency in financial performance, market share growth, and management execution is key to long-term success.<br>Consider your investment goals: Align your investment choices with your risk tolerance and time horizon. A young, high-growth company might be riskier but offer higher potential returns, while a mature, dividend-paying company might be more stable but offer lower growth.<br><br>Always Remember:<br>Analyzing company health is an ongoing process, not a one-time event. Stay updated with industry news, company announcements, and financial reports.<br>Diversification is key. Don't put all your eggs in one basket. Spread your investments across different companies and sectors to mitigate risk.<br>Seek professional guidance if needed. Financial advisors can provide personalized advice based on your specific financial situation and goals.<br>By following these steps and conducting thorough research, you can make informed investment decisions and pick fundamentally strong companies that will help you reach your financial goals. Happy hunting!</p>",
+        "article3-9-3": "<h1>Welcome to Module 3! This is Lesson 9 Part 3- Sector Analysis</h1><p>Investing in the stock market can be thrilling, yet daunting. With countless companies vying for your attention, it's easy to feel overwhelmed. This is where sector analysis comes in, a powerful tool that helps you navigate the market with clarity and purpose. By understanding the economic and financial landscape of specific industries, you gain valuable insights to inform your investment decisions.<br>Step 1: Choose Your Battlefield<br>Before diving headfirst, define your target. Select a sector that sparks your interest, whether it's the evolving world of technology or the essential realm of healthcare. Research the sector's composition, identifying the major players and their market share. Understanding the competitive landscape is crucial for gauging the sector's overall health and potential for growth.<br>Step 2: Zoom Out<br>Don't get lost in the woods; take a step back and consider the broader economic forces at play. Is the sector sensitive to interest rates, inflation, or global events? Government regulations and tax policies can significantly impact specific sectors. Every sector is susceptible to fluctuations within the broader business cycle. Analyzing these macroeconomic factors helps you anticipate potential tailwinds or headwinds that might impact the sector's performance.<br>Step 3: Numbers Matter<br>Now, it's time to get down to the nitty-gritty: financial metrics. Delve into key ratios like price-to-earnings (P/E), price-to-book (P/B), and debt-to-equity ratios to assess the sector's valuation and financial health. Compare these ratios with historical data and benchmark them against other sectors to identify any red flags or hidden gems.<br>Step 4: Growth Story<br>Growth potential is the lifeblood of any investment. Analyze the sector's projected revenue growth, market penetration, and technological advancements. Identify any disruptive trends or innovations that could reshape the industry landscape and create new opportunities. Remember, a sector with strong growth prospects can be a goldmine for investors.<br>Step 5: Competition<br>No sector exists in isolation. Analyze the competitive dynamics within the sector. Are there dominant players with significant market share? How intense is the competition for resources and customers? Understanding these competitive forces helps you identify the sector's leading companies and their potential for sustainable growth.<br>Step 6: Sentiment Matters<br>Don't underestimate the power of sentiment. Gauge investor and analyst sentiment towards the sector by following news articles, industry reports, social media trends, and analyst recommendations. This can provide valuable insights into the perceived future trajectory of the sector and potential market psychology shifts. Remember, fear and greed can significantly impact stock prices, so check the fear and greed index to identify overall market sentiment.<br>Bonus Tip: Stay Agile! Be ready to change your mind if the facts change.<br>The financial world is a dynamic beast. Regularly monitor economic data releases, industry conferences, and company news to stay updated on emerging trends and adjust your analysis accordingly. Remember, the market is constantly evolving, so adaptability is key to future gains. By following these steps and continuously honing your analysis skills, you can transform from a naive beginner to a confident investor, navigating the stock market with precision and purpose. Remember, sector analysis is not a crystal ball. It's an informed assessment based on available data and analysis. Use it as a tool to guide your investment decisions, but always consider your risk tolerance and overall investment strategy before making any final calls. In the short term, the stock market can behave irrationally, but over the long term, it tends to align more accurately with the true value of assets.<br>Happy investing!</p>",
+        "article4-10-1": "<h1>Welcome to Module 4! This is Lesson 10 Part 1</h1><p>Content for Sub Lesson 10.1</p>",
+        "article4-10-2": "<h1>Welcome to Module 4! This is Lesson 10 Part 2</h1><p>Content for Sub Lesson 10.2</p>",
+        "article4-10-3": "<h1>Welcome to Module 4! This is Lesson 10 Part 3</h1><p>Content for Sub Lesson 10.3</p>",
+        "article4-11-1": "<h1>Welcome to Module 4! This is Lesson 11 Part 1</h1><p>Content for Sub Lesson 11.1</p>",
+        "article5-11-2": "<h1>Welcome to Module 4! This is Lesson 11 Part 2</h1><p>Content for Sub Lesson 11.2</p>",
+        "article5-12-1": "<h1>Welcome to Module 5! This is Lesson 12 Part 1</h1><p>Content for Sub Lesson 12.1</p>",
+        "article5-12-2": "<h1>Welcome to Module 5! This is Lesson 12 Part 2</h1><p>Content for Sub Lesson 12.2</p>",
+        "article5-12-3": "<h1>Welcome to Module 5! This is Lesson 12 Part 3</h1><p>Content for Sub Lesson 12.3</p>",
+        "article5-13-1": "<h1>Welcome to Module 5! This is Lesson 13 Part 1</h1><p>Content for Sub Lesson 13.1</p>",
+        "article5-13-2": "<h1>Welcome to Module 5! This is Lesson 13 Part 2</h1><p>Content for Sub Lesson 13.2</p>",
+        "article5-13-3": "<h1>Welcome to Module 5! This is Lesson 13 Part 3</h1><p>Content for Sub Lesson 13.3</p>",
+        "article6-14-1": "<h1>Welcome to Module 6! This is Lesson 14 Part 1</h1><p>Content for Sub Lesson 14.1<</p>",
+        "article6-14-2": "<h1>Welcome to Module 6! This is Lesson 14 Part 2</h1><p>Content for Sub Lesson 14.2<</p>",
+        "article6-15-1": "<h1>Welcome to Module 6! This is Lesson 15 Part 1</h1><p>Content for Sub Lesson 15.1<</p>",
+        "article6-15-2": "<h1>Welcome to Module 6! This is Lesson 15 Part 2</h1><p>Content for Sub Lesson 15.2<</p>",
+        "article6-15-3": "<h1>Welcome to Module 6! This is Lesson 15 Part 3</h1><p>Content for Sub Lesson 15.3<</p>",
+        "article6-15-4": "<h1>Welcome to Module 6! This is Lesson 15 Part 4</h1><p>Content for Sub Lesson 15.4<</p>",
+        "article6-16-1": "<h1>Welcome to Module 6! This is Lesson 16 Part 1</h1><p>Content for Sub Lesson 16.1<</p>",
+        "article6-16-2": "<h1>Welcome to Module 6! This is Lesson 16 Part 2</h1><p>Content for Sub Lesson 16.2<</p>",
+        "article6-16-3": "<h1>Welcome to Module 6! This is Lesson 16 Part 3</h1><p>Content for Sub Lesson 16.3<</p>",
+        "article5-17-1": "<h1>Welcome to Module 6! This is Lesson 17 Part 1</h1><p>Content for Sub Lesson 17.1<</p>",
+        "article6-17-2": "<h1>Welcome to Module 6! This is Lesson 17 Part 2</h1><p>Content for Sub Lesson 17.2<</p>",
+        "article6-17-3": "<h1>Welcome to Module 6! This is Lesson 17 Part 3</h1><p>Content for Sub Lesson 17.3<</p>",
+        "article6-17-4": "<h1>Welcome to Module 6! This is Lesson 17 Part 4</h1><p>Content for Sub Lesson 17.4<</p>",
+        "article6-17-5": "<h1>Welcome to Module 6! This is Lesson 17 Part 5</h1><p>Content for Sub Lesson 17.5<</p>",
+        "article6-17-6": "<h1>Welcome to Module 6! This is Lesson 17 Part 6</h1><p>Content for Sub Lesson 17.6<</p>",
+        "article6-17-7": "<h1>Welcome to Module 6! This is Lesson 17 Part 7</h1><p>Content for Sub Lesson 17.7<</p>",
+        
+    };
+    function toggleSubLessons(lessonElement) {
+        var subLessons = lessonElement.querySelector('.sub-lessons');
+        if (subLessons.style.display === 'block') {
+            subLessons.style.display = 'none';
+        } else {
+            subLessons.style.display = 'block';
+        }
+    }
+
+    document.querySelectorAll('.sub-lesson').forEach(function(subLesson) {
+        subLesson.addEventListener('click', function() {
+            loadArticleContent(this.getAttribute('data-article-id'));
+        });
+    });
+
+    function loadArticleContent(articleId) {
+        // Determine which module the article belongs to
+        var moduleId = articleId.split('-')[0]; // Extracts 'article' or 'article2', etc.
+        console.log(moduleId);
+
+        // Select the correct article element based on the module
+        var articleElement;
+        if (moduleId === "article") {
+            articleElement = document.querySelector('#module_1 .main-content article');
+        } else if (moduleId === "article2") {
+            articleElement = document.querySelector('#module_2 .main-content article');
+        } else if (moduleId === "article3") {
+            articleElement = document.querySelector('#module_3 .main-content article');
+        } else if (moduleId === "article4") {
+            articleElement = document.querySelector('#module_4 .main-content article');
+        } else if (moduleId === "article5") {
+            articleElement = document.querySelector('#module_5 .main-content article');
+        } else if (moduleId === "article6") {
+            articleElement = document.querySelector('#module_6 .main-content article');
+        } else {
+            console.error("Invalid module ID");
+            return;
+        }
+
+        // Update the article content
+        articleElement.innerHTML = articleContents[articleId] || "<p>Content not found.</p>";
+    }
+    
+</script>
+{% endblock %}

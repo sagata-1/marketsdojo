@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+<br>
+<div class="container-fluid bg-dark text-center rounded p-4 shado opacity-75 table-responsive-sm">
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th class="text-start">Symbol</th>
+            <th class="text-start">Name</th>
+            <th class="text-end">Current Price (per unit)</th>
+            <th class="text-end">Exchange Traded On</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stock in stocks %}
+            <tr>
+                <td class="text-start">{{stock.symbol}}</td>
+                <td class="text-start">{{stock.name}}</td>
+                <td class="text-end">{{stock.price | usd}}</td>
+                <td class="text-end">{{stock.exchange}}</td>
+            </tr>
+        {% endfor %}
+
+</tbody>
+</table>
+</div>
+<script>
+    
+
+</script>
+{% endblock %}

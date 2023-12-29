@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <g id="ic_menu_flip" transform="translate(-1.612 -2)">
+    <g id="Rectangle_3219" data-name="Rectangle 3219" transform="translate(1.612 2)" fill="#eee" stroke="#b2b2b2" stroke-width="1">
+      <rect width="32" height="32" rx="16" stroke="none"/>
+      <rect x="0.5" y="0.5" width="31" height="31" rx="15.5" fill="none"/>
+    </g>
+    <g id="Group_62251" data-name="Group 62251" transform="translate(12.285 13.264)">
+      <g id="Group_43505" data-name="Group 43505" transform="translate(5.923 0)">
+        <path id="Union_40" data-name="Union 40" d="M4.737,4.736,0,0ZM0,9.473,4.737,4.736Z" transform="translate(4.737 9.473) rotate(180)" fill="#666" stroke="#666" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Group_62250" data-name="Group 62250" transform="translate(0.002 0)">
+        <path id="Union_40-2" data-name="Union 40" d="M4.737,4.736,0,0ZM0,9.473,4.737,4.736Z" transform="translate(4.737 9.473) rotate(180)" fill="#666" stroke="#666" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+    </g>
+  </g>
+</svg>
