@@ -11,6 +11,8 @@ import logging
 from helpers import apology, commodity_list, login_required, lookup, usd, answer, total_computation, admin_required, list_lookup
 from urllib.parse import quote_plus
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
+from flask_jwt_extended import create_access_token
 
 # Configure application
 app = Flask(__name__)
@@ -36,7 +38,8 @@ Session(app)
 # Configure database connection
 con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
 db = con.cursor(cursor_factory=RealDictCursor)
-
+app.config['JWT_SECRET_KEY'] = 'RANDOM_KEY_THAT_IS_SECRET'
+jwt = JWTManager(app)
 
 # @app.after_request
 # def after_request(response):
@@ -46,6 +49,10 @@ db = con.cursor(cursor_factory=RealDictCursor)
 #     response.headers["Pragma"] = "no-cache"
 #     return response
 
+def create_token(user_id, username):
+    # Expiration time of the token
+    access_token = create_access_token(identity={'id': user_id, 'username': username}, expires_delta=None)
+    return access_token
 
 @app.route("/")
 @login_required
@@ -704,6 +711,7 @@ def sell():
     stock = db.fetchall()
     db.execute("SELECT type FROM portfolios WHERE stock_symbol = (%s)", (symbol,))
     types = db.fetchall()
+    # Sell bug for stock data with multiple types here
     type_ans = types[0]["type"]
     if type != type_ans:
         return apology("Asset Type does not match symbol", 400)
