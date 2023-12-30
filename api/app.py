@@ -94,7 +94,7 @@ def index():
     types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
-@app.route("/portfolio_api")
+@app.route("/api/portfolio")
 @login_required
 def portfolio_api():
     # Current request format: https://www.marketsdojo.com/portfolio_api and only works when we have a logged in user, with Flask Session handling the login
@@ -148,7 +148,7 @@ def commodity():
         return render_template("commodity.html", commodities=commodities)
     
 # api route to get commodities list
-@app.route("/commodity_api", methods=["GET"])
+@app.route("/api/commodity", methods=["GET"])
 @login_required
 def commodity_api():
     # Current endpoint: https://www.marketsdojo.com/commodity_api
@@ -176,7 +176,7 @@ def learn():
     assets = []
     return render_template("learn.html", username=username, progress=progress)
 
-@app.route("/learn_api", methods=["GET", "POST"])
+@app.route("/api/learn", methods=["GET", "POST"])
 @login_required
 def learn_api():
     if request.method == "POST":
