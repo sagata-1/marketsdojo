@@ -2,7 +2,7 @@ from helpers import lookup, list_lookup, commodity_list
 from helpers import apology_test
 from helpers import total_computation
 from helpers import leaderboard
-from helpers import buy_test, sell_test, update_test
+from helpers import buy_test, sell_test, update_test, login_api, register_api
 from datetime import datetime, timedelta, timezone
 import psycopg2
 from psycopg2.extras import RealDictCursor
