@@ -405,12 +405,10 @@ def buy():
         flash("Bought!")
     return redirect("/")
 
-@app.route("/buy_api", methods=["GET"])
+@app.route("/api/buy", methods=["GET"])
 @login_required
 def buy_api():
     """Buy shares of stock"""
-    # Current endpoint: https://www.marketsdojo.com/buy_api?symbol=STOCKSYMBOL&shares=NUMSHARES&type=STOCKTYPE
-    # This will conduct a complete buy operation on the backend and then send you back to https://www.marketsdojo.com/portfolio_api
     # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
     symbol = request.args.get("symbol")
     num_shares = request.args.get("shares")
@@ -869,12 +867,10 @@ def sell():
         flash("Sold!")
     return redirect("/")
 
-@app.route("/sell_api", methods=["GET"])
+@app.route("/api/sell", methods=["GET"])
 @login_required
 def sell_api():
     """Sell shares of stock"""
-    # Current endpoint: https://www.marketsdojo.com/sell_api?symbol=STOCKSYMBOL&shares=NUMSHARES&type=STOCKTYPE
-    # This will conduct a complete buy operation on the backend and then send you back to https://www.marketsdojo.com/portfolio_api
     # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
     type = request.args.get("type")
     symbol = request.args.get("symbol")
