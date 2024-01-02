@@ -96,35 +96,36 @@ def index():
 
 @app.route("/api/portfolio")
 @login_required
-def portfolio_api():
-    # Current request format: https://www.marketsdojo.com/portfolio_api and only works when we have a logged in user, with Flask Session handling the login
-    # Request possible format: https://www.marketsdojo.com/portfolio_api?user_id=USERID
+def portfolio_api(access_token):
     """Show portfolio of stocks"""
+    db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token, ))
+    user_id = db.fetchall()
+    user_id = user_id[0]["id"]
     db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s)", (session["user_id"],)
+        "SELECT * FROM portfolios WHERE user_id = (%s)", (user_id,)
     )
     portfolio = db.fetchall()
     for stock in portfolio:
         db.execute(
             "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
             (lookup(stock["stock_symbol"], stock["type"])["price"],
-            session["user_id"],
+            user_id,
             stock["stock_symbol"],
             stock["type"])
         )
         con.commit()
-    db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
+    db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
     cash = db.fetchall()
     cash = float(cash[0]["cash"])
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s) ORDER BY stock_symbol",
-        (session["user_id"],)
+        (user_id,)
     )
     portfolio = db.fetchall()
     total = cash
     for stock in portfolio:
         total += stock["price"] * stock["num_shares"]
-    db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
+    db.execute("SELECT username FROM users WHERE id = (%s)", (user_id,))
     username = db.fetchall()
     username = username[0]["username"]
     pl = round(total - 10000, 2)
