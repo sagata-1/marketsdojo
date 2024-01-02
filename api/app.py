@@ -11,6 +11,8 @@ import logging
 from helpers import apology, commodity_list, login_required, lookup, usd, answer, total_computation, admin_required, list_lookup
 from urllib.parse import quote_plus
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
+from flask_jwt_extended import create_access_token
 
 # Configure application
 app = Flask(__name__)
@@ -36,7 +38,8 @@ Session(app)
 # Configure database connection
 con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
 db = con.cursor(cursor_factory=RealDictCursor)
-
+app.config['JWT_SECRET_KEY'] = 'RANDOM_KEY_THAT_IS_SECRET'
+jwt = JWTManager(app)
 
 # @app.after_request
 # def after_request(response):
@@ -46,6 +49,10 @@ db = con.cursor(cursor_factory=RealDictCursor)
 #     response.headers["Pragma"] = "no-cache"
 #     return response
 
+def create_token(user_id, username):
+    # Expiration time of the token
+    access_token = create_access_token(identity={'id': user_id, 'username': username}, expires_delta=None)
+    return access_token
 
 @app.route("/")
 @login_required
@@ -87,7 +94,7 @@ def index():
     types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
-@app.route("/portfolio_api")
+@app.route("/api/portfolio")
 @login_required
 def portfolio_api():
     # Current request format: https://www.marketsdojo.com/portfolio_api and only works when we have a logged in user, with Flask Session handling the login
@@ -141,7 +148,7 @@ def commodity():
         return render_template("commodity.html", commodities=commodities)
     
 # api route to get commodities list
-@app.route("/commodity_api", methods=["GET"])
+@app.route("/api/commodity", methods=["GET"])
 @login_required
 def commodity_api():
     # Current endpoint: https://www.marketsdojo.com/commodity_api
@@ -169,7 +176,7 @@ def learn():
     assets = []
     return render_template("learn.html", username=username, progress=progress)
 
-@app.route("/learn_api", methods=["GET", "POST"])
+@app.route("/api/learn", methods=["GET", "POST"])
 @login_required
 def learn_api():
     if request.method == "POST":
@@ -398,12 +405,10 @@ def buy():
         flash("Bought!")
     return redirect("/")
 
-@app.route("/buy_api", methods=["GET"])
+@app.route("/api/buy", methods=["GET"])
 @login_required
 def buy_api():
     """Buy shares of stock"""
-    # Current endpoint: https://www.marketsdojo.com/buy_api?symbol=STOCKSYMBOL&shares=NUMSHARES&type=STOCKTYPE
-    # This will conduct a complete buy operation on the backend and then send you back to https://www.marketsdojo.com/portfolio_api
     # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
     symbol = request.args.get("symbol")
     num_shares = request.args.get("shares")
@@ -680,6 +685,73 @@ def register():
 
     else:
         return render_template("register.html")
+    
+# Api version of register
+@app.route("/api/register", methods=["POST"])
+def register_api():
+    """Register user"""
+    data = request.json
+    username = data.get("username")
+    email = data.get("email")
+    if not username:
+        return jsonify([{"error": {"code": 400, "message": "username not provided"}}]), 400
+    if not email:
+        return jsonify([{"error": {"code": 400, "message": "email not provided"}}]), 400
+    db.execute("SELECT username FROM users WHERE username = (%s)", (username,))
+    database = db.fetchall()
+    db.execute("SELECT email FROM users WHERE email = (%s)", (email,))
+    database_email = db.fetchall()
+    if (
+        len(database)
+        > 0 or len(database_email) > 0
+    ):
+        return jsonify([{"error": {"code": 400, "message": "username or email already exists"}}]), 400
+    password = data.get("password")
+    if not password:
+        return jsonify([{"error": {"code": 400, "message": "Did not enter a password"}}]), 400
+    # Register user
+    db.execute("INSERT INTO users (username, hash, email) VALUES(%s, %s, %s)", (username,generate_password_hash(password), email))
+    con.commit()
+    db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
+    user = db.fetchall()
+    # Create a progress section in the database for the user
+    db.execute("INSERT INTO progress (user_id, total_prog, mod_1, mod_2, mod_3, mod_4, mod_5, mod_6) VALUES(%s, 0, 0, 0, 0, 0, 0, 0)", (user[0]["id"],))
+    con.commit()
+    # generate token
+    access_token = create_access_token(user[0]["id"], username)
+    db.execute("INSERT INTO tokens_userid (id, tokens) VALUES(%s, %s)", (user[0]["id"], access_token))
+    con.commit()
+    return jsonify([{"username": username, "user_id": user[0]["id"], "email": email, "access_token": access_token}])
+
+# Api version of login
+@app.route("/api/login", methods=["POST"])
+def login_api():
+    """Register user"""
+    data = request.json
+    username = data.get("username")
+    if not username:
+        return jsonify([{"error": {"code": 403, "message": "username not provided"}}]), 403
+    password = data.get("password")
+    if not password:
+        return jsonify([{"error": {"code": 403, "message": "Did not enter a password"}}]), 403
+    db.execute("SELECT * FROM users WHERE username = (%s)", (username,))
+    database = db.fetchall()
+    # Check user exists and password is correct
+    if (
+        len(database)
+        != 1 or not check_password_hash(
+            database[0]["hash"], password
+        )
+    ):
+        return jsonify([{"error": {"code": 403, "message": "Incorrect username or password"}}]), 403
+    # Register user
+    db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
+    user = db.fetchall()
+    # getv access token
+    db.execute("SELECT tokens FROM tokens_userid WHERE id = (%s)", (user[0]["id"],))
+    access_token = db.fetchall()
+    access_token = access_token[0]["tokens"]
+    return jsonify([{"username": username, "user_id": user[0]["id"], "access_token": access_token}])
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -704,6 +776,7 @@ def sell():
     stock = db.fetchall()
     db.execute("SELECT type FROM portfolios WHERE stock_symbol = (%s)", (symbol,))
     types = db.fetchall()
+    # Sell bug for stock data with multiple types here
     type_ans = types[0]["type"]
     if type != type_ans:
         return apology("Asset Type does not match symbol", 400)
@@ -794,12 +867,10 @@ def sell():
         flash("Sold!")
     return redirect("/")
 
-@app.route("/sell_api", methods=["GET"])
+@app.route("/api/sell", methods=["GET"])
 @login_required
 def sell_api():
     """Sell shares of stock"""
-    # Current endpoint: https://www.marketsdojo.com/sell_api?symbol=STOCKSYMBOL&shares=NUMSHARES&type=STOCKTYPE
-    # This will conduct a complete buy operation on the backend and then send you back to https://www.marketsdojo.com/portfolio_api
     # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
     type = request.args.get("type")
     symbol = request.args.get("symbol")

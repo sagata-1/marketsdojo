@@ -8,8 +8,8 @@ import uuid
 import openai
 import psycopg2
 from psycopg2.extras import RealDictCursor
-
-from flask import redirect, render_template, session
+from werkzeug.security import check_password_hash
+from flask import redirect, render_template, session, jsonify
 from functools import wraps
 
 con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
@@ -133,6 +133,71 @@ def leaderboard():
         username["total"] = total_computation(username["username"])[0]
     usernames = sorted(usernames, key=lambda a: a["total"], reverse=True)
     return usernames
+
+# Api version of login test
+def login_api(request):
+    """Register user"""
+    data = request
+    username = data.get("username")
+    if not username:
+        return [{"error": {"code": 403, "message": "username not provided"}}]
+    password = data.get("password")
+    if not password:
+        return [{"error": {"code": 403, "message": "Did not enter a password"}}]
+    db.execute("SELECT * FROM users WHERE username = (%s)", (username,))
+    database = db.fetchall()
+    # Check user exists and password is correct
+    if (
+        len(database)
+        != 1 or not check_password_hash(
+            database[0]["hash"], password
+        )
+    ):
+        return [{"error": {"code": 403, "message": "Incorrect username and/or password"}}]
+    # Register user
+    db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
+    user = db.fetchall()
+    # getv access token
+    db.execute("SELECT tokens FROM tokens_userid WHERE id = (%s)", (user[0]["id"],))
+    access_token = db.fetchall()
+    access_token = access_token[0]["tokens"]
+    return [{"username": username, "user_id": user[0]["id"], "access_token": access_token}]
+
+# Api version of register
+def register_api(request):
+    """Register user"""
+    data = request.json
+    username = data.get("username")
+    email = data.get("email")
+    if not username:
+        return jsonify([{"error": {"code": 400, "message": "username not provided"}}])
+    if not email:
+        return jsonify([{"error": {"code": 400, "message": "email not provided"}}])
+    db.execute("SELECT username FROM users WHERE username = (%s)", (username,))
+    database = db.fetchall()
+    db.execute("SELECT email FROM users WHERE email = (%s)", (email,))
+    database_email = db.fetchall()
+    if (
+        len(database)
+        > 0 or len(database_email) > 0
+    ):
+        return jsonify([{"error": {"code": 400, "message": "username or email already exists"}}])
+    password = data.get("password")
+    if not password:
+        return jsonify([{"error": {"code": 400, "message": "Did not enter a password"}}])
+    # Register user
+    db.execute("INSERT INTO users (username, hash, email) VALUES(%s, %s, %s)", (username,generate_password_hash(password), email))
+    con.commit()
+    db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
+    user = db.fetchall()
+    # Create a progress section in the database for the user
+    db.execute("INSERT INTO progress (user_id, total_prog, mod_1, mod_2, mod_3, mod_4, mod_5, mod_6) VALUES(%s, 0, 0, 0, 0, 0, 0, 0)", (user[0]["id"],))
+    con.commit()
+    # generate token
+    access_token = create_access_token(user[0]["id"], username)
+    db.execute("INSERT INTO tokens_userid (id, tokens) VALUES(%s, %s)", (user[0]["id"], access_token))
+    con.commit()
+    return jsonify([{"username": username, "user_id": user[0]["id"], "email": email, "access_token": access_token}])
 
 def buy_test(symbol, user_id, num_shares, type, time):
     """Buy shares of stock"""
