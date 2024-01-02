@@ -1,0 +1,11 @@
+name: Testing
+on: pull_request
+
+jobs:
+  test_project:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Unit Tests
+      run: 
+          pip3 install --user -r requirements.txt && pytest api/si_test.py

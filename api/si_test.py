@@ -2,13 +2,19 @@ from helpers import lookup, list_lookup, commodity_list
 from helpers import apology_test
 from helpers import total_computation
 from helpers import leaderboard
-from helpers import buy_test, sell_test, update_test
+from helpers import buy_test, sell_test, update_test, login_api, register_api
 from datetime import datetime, timedelta, timezone
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
 con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
 db = con.cursor(cursor_factory=RealDictCursor)
+
+def test_login():
+    assert(login_api({"username":"Arman Jasuja", "password": "abcdefg"}) == [{"username":"Arman Jasuja", "user_id": 26, "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6IkFybWFuIEphc3VqYSIsImlhdCI6MTcwNDE5MDI5MiwianRpIjoiMWI4N2Q1OTQtNWVkMy00ZDk3LWEzNTAtMGJlMzhlOTU4NzA1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MjYsIm5iZiI6MTcwNDE5MDI5MiwiY3NyZiI6IjBlNTBjMTZjLTNjMWItNDY0Ny1hYWFlLTgwMDY3OTdiYWU2YSIsImV4cCI6MTcwNDE5MTE5Mn0.WC6XDZs3tVyEHT8y3WN0SVxEUVkAoBdKKCmfzF6OVlk"}])
+    assert(login_api({"username":"Arman Jasuja", "password": "abcdef"}) == [{"error": {"code": 403, "message": "Incorrect username and/or password"}}])
+    assert(login_api({"usernam":"Arman Jasuja", "password": "abcdef"}) == [{"error": {"code": 403, "message": "username not provided"}}])
+    assert(login_api({"username":"Arman Jasuja", "passwor": "abcdef"}) == [{"error": {"code": 403, "message": "Did not enter a password"}}])
 
 def test_update():
     db.execute("UPDATE progress set total_prog = 0.882352941176471, mod_5 = 0 WHERE user_id = (%s)", (22, ))
