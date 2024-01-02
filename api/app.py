@@ -96,35 +96,36 @@ def index():
 
 @app.route("/api/portfolio")
 @login_required
-def portfolio_api():
-    # Current request format: https://www.marketsdojo.com/portfolio_api and only works when we have a logged in user, with Flask Session handling the login
-    # Request possible format: https://www.marketsdojo.com/portfolio_api?user_id=USERID
+def portfolio_api(access_token):
     """Show portfolio of stocks"""
+    db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token, ))
+    user_id = db.fetchall()
+    user_id = user_id[0]["id"]
     db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s)", (session["user_id"],)
+        "SELECT * FROM portfolios WHERE user_id = (%s)", (user_id,)
     )
     portfolio = db.fetchall()
     for stock in portfolio:
         db.execute(
             "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
             (lookup(stock["stock_symbol"], stock["type"])["price"],
-            session["user_id"],
+            user_id,
             stock["stock_symbol"],
             stock["type"])
         )
         con.commit()
-    db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
+    db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
     cash = db.fetchall()
     cash = float(cash[0]["cash"])
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s) ORDER BY stock_symbol",
-        (session["user_id"],)
+        (user_id,)
     )
     portfolio = db.fetchall()
     total = cash
     for stock in portfolio:
         total += stock["price"] * stock["num_shares"]
-    db.execute("SELECT username FROM users WHERE id = (%s)", (session["user_id"],))
+    db.execute("SELECT username FROM users WHERE id = (%s)", (user_id,))
     username = db.fetchall()
     username = username[0]["username"]
     pl = round(total - 10000, 2)
@@ -694,9 +695,9 @@ def register_api():
     username = data.get("username")
     email = data.get("email")
     if not username:
-        return jsonify([{"error": {"code": 400, "message": "username not provided"}}]), 400
+        return jsonify({"error": {"code": 400, "message": "username not provided"}}), 400
     if not email:
-        return jsonify([{"error": {"code": 400, "message": "email not provided"}}]), 400
+        return jsonify({"error": {"code": 400, "message": "email not provided"}}), 400
     db.execute("SELECT username FROM users WHERE username = (%s)", (username,))
     database = db.fetchall()
     db.execute("SELECT email FROM users WHERE email = (%s)", (email,))
@@ -705,10 +706,10 @@ def register_api():
         len(database)
         > 0 or len(database_email) > 0
     ):
-        return jsonify([{"error": {"code": 400, "message": "username or email already exists"}}]), 400
+        return jsonify({"error": {"code": 400, "message": "username or email already exists"}}), 400
     password = data.get("password")
     if not password:
-        return jsonify([{"error": {"code": 400, "message": "Did not enter a password"}}]), 400
+        return jsonify({"error": {"code": 400, "message": "Did not enter a password"}}), 400
     # Register user
     db.execute("INSERT INTO users (username, hash, email) VALUES(%s, %s, %s)", (username,generate_password_hash(password), email))
     con.commit()
@@ -721,7 +722,7 @@ def register_api():
     access_token = create_access_token(user[0]["id"], username)
     db.execute("INSERT INTO tokens_userid (id, tokens) VALUES(%s, %s)", (user[0]["id"], access_token))
     con.commit()
-    return jsonify([{"username": username, "user_id": user[0]["id"], "email": email, "access_token": access_token}])
+    return jsonify({"username": username, "user_id": user[0]["id"], "email": email, "access_token": access_token})
 
 # Api version of login
 @app.route("/api/login", methods=["POST"])
@@ -730,10 +731,10 @@ def login_api():
     data = request.json
     username = data.get("username")
     if not username:
-        return jsonify([{"error": {"code": 403, "message": "username not provided"}}]), 403
+        return jsonify({"error": {"code": 403, "message": "username not provided"}}), 403
     password = data.get("password")
     if not password:
-        return jsonify([{"error": {"code": 403, "message": "Did not enter a password"}}]), 403
+        return jsonify({"error": {"code": 403, "message": "Did not enter a password"}}), 403
     db.execute("SELECT * FROM users WHERE username = (%s)", (username,))
     database = db.fetchall()
     # Check user exists and password is correct
@@ -743,7 +744,7 @@ def login_api():
             database[0]["hash"], password
         )
     ):
-        return jsonify([{"error": {"code": 403, "message": "Incorrect username or password"}}]), 403
+        return jsonify({"error": {"code": 403, "message": "Incorrect username or password"}}), 403
     # Register user
     db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
     user = db.fetchall()
@@ -751,7 +752,7 @@ def login_api():
     db.execute("SELECT tokens FROM tokens_userid WHERE id = (%s)", (user[0]["id"],))
     access_token = db.fetchall()
     access_token = access_token[0]["tokens"]
-    return jsonify([{"username": username, "user_id": user[0]["id"], "access_token": access_token}])
+    return jsonify({"username": username, "user_id": user[0]["id"], "access_token": access_token})
 
 
 @app.route("/sell", methods=["GET", "POST"])

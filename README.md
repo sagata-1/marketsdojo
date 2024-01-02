@@ -101,54 +101,73 @@ Allows a user to log in to the system. The endpoint accepts JSON data with the u
 - The `access_token` provided in the responses is used for authenticating subsequent requests to the API.
 - Error codes follow standard HTTP status codes for ease of understanding and handling in client applications.
 
-## Routes to be deprecated- NOTE: DO NOT USE: These work on session data, not stateless access token data.
+### 3. Portfolio API
 
-### 1. Portfolio API
+#### Endpoint
+`/api/portfolio`
 
-**Endpoint Description**: Displays the user's portfolio of stocks, including the current value of each stock, total cash available, and overall portfolio performance.
+#### Method
+`GET`
 
-**HTTP Method**: GET
+#### Description
+The Portfolio API provides details of the user's stock portfolio. It requires authentication via an access token. The endpoint retrieves the user's portfolio, updates the current prices of the stocks, calculates the total value and profit/loss, and returns detailed portfolio information including the user's cash on hand and various types of investments.
 
-**Route**: `api/portfolio`
+#### Authentication
+- This API requires an access token for authentication.
+- The access token must be provided as a query parameter in the request URL.
 
-**Parameters**: None at the moment
+#### Request Format
+- **Authenticated Request URL**: `https://marketsdojo.vercel.app/api/portfolio?access_token=YOUR_ACCESS_TOKEN`
 
-**Authentication**: User must be logged in (handled by Flask Session), otherwise the endpoint redirects to the landing page.
+#### Query Parameters
+- `access_token` (string): The token used to authenticate the user's session.
 
-**Request Example**:
+#### Response
+- **Success (200 OK)**: Returns a JSON object with the following keys:
+  - `portfolio`: An array of the user's stock holdings, including stock symbol, number of shares, and current price.
+  - `cash`: The user's current cash balance in USD.
+  - `total`: The total value of the user's portfolio in USD.
+  - `starting_amt`: The starting amount of the portfolio (default is 10,000 USD).
+  - `username`: The username of the account holder.
+  - `pl`: The total profit or loss since the start in USD.
+  - `percent_pl`: The percentage profit or loss since the start.
+  - `types`: An array of investment types (e.g., Stock (Equity), Forex, Index, ETF, CFD, Commodity).
+- **Error (403 Forbidden)**:
+  - `{"error": {"code": 403, "message": "Missing access token"}}` - If the access token is not provided in the request.
+  - `{"error": {"code": 403, "message": "Invalid Access Token"}}` - If the provided access token is invalid or expired.
+
+#### Example Request
 ```
-GET https://marketsdojo.vercel.app/api/portfolio
+GET https://marketsdojo.vercel.app/api/portfolio?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Response Example**:
-```
+#### Example Response
+```json
 {
   "portfolio": [
-    {"stock_symbol": "APPL", "price": 150.00, "num_shares": 10, "type": "Stock (Equity)"},
-    // ... other stocks ...
+    {
+      "stock_symbol": "AAPL",
+      "num_shares": 10,
+      "price": 150
+    },
+    // ... more stocks
   ],
   "cash": "$5000.00",
-  "total": "$20000.00",
+  "total": "$15000.00",
   "starting_amt": 10000,
-  "username": "john_doe",
-  "pl": 10000.00,
-  "percent_pl": 100.00,
+  "username": "user123",
+  "pl": 5000,
+  "percent_pl": 50.00,
   "types": ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
 }
 ```
 
-**Error Handling**:
-- If the user is not logged in, they will not be able to access this endpoint.
-- Any database connection issues or errors in fetching data will currently affect this endpoint.
-
-**Additional Notes**: 
-- The `/api/portfolio` endpoint updates the price of each stock in the user's portfolio to the current market price before returning the data.
-- The response includes the user's total cash, the total value of the portfolio, the user's net profit or loss (pl), and the percentage of profit or loss (percent_pl).
-- The starting amount is provided for reference (in this example, it's set at 10,000).
-- The `types` array lists all the different types of assets that can be part of the portfolio.
-- I plan to add in some exception handling in order to account for the case of the connection and database issues that could occur.
-
 ---
+
+### General Notes
+- This API endpoint is designed to be accessed by authenticated users only.
+
+## Routes to be deprecated- NOTE: DO NOT USE: These work on session data, not stateless access token data.
 
 
 ### 2. Buy API
