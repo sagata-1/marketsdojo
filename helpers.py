@@ -9,7 +9,7 @@ import openai
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from werkzeug.security import check_password_hash
-from flask import redirect, render_template, session, jsonify
+from flask import redirect, render_template, session, jsonify, request
 from functools import wraps
 
 con = psycopg2.connect(dbname="postgres", user="postgres", password="Saucepan03@!", host="db.krvuffjhmqiyerbpgqtv.supabase.co")
@@ -52,11 +52,55 @@ def login_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("user_id") is None:
-            return redirect("/landing")
-        return f(*args, **kwargs)
+        access_token = request.args.get("access_token")
+        if access_token is None:
+            return jsonify({"error": {"code": 403, "message": "Missing access token"}})
+        db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token,))
+        id = db.fetchall()
+        if len(id) != 1:
+            return jsonify({"error": {"code": 403, "message": "Invalid Access Token"}})
+        
+        return f(*args, **kwargs, access_token=access_token)
 
     return decorated_function
+
+def portfolio_api(access_token):
+    """Show portfolio of stocks"""
+    db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token, ))
+    user_id = db.fetchall()
+    user_id = user_id[0]["id"]
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s)", (user_id,)
+    )
+    portfolio = db.fetchall()
+    for stock in portfolio:
+        db.execute(
+            "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
+            (lookup(stock["stock_symbol"], stock["type"])["price"],
+            user_id,
+            stock["stock_symbol"],
+            stock["type"])
+        )
+        con.commit()
+    db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
+    cash = db.fetchall()
+    cash = float(cash[0]["cash"])
+    db.execute(
+        "SELECT * FROM portfolios WHERE user_id = (%s) ORDER BY stock_symbol",
+        (user_id,)
+    )
+    portfolio = db.fetchall()
+    total = cash
+    for stock in portfolio:
+        total += stock["price"] * stock["num_shares"]
+    db.execute("SELECT username FROM users WHERE id = (%s)", (user_id,))
+    username = db.fetchall()
+    username = username[0]["username"]
+    pl = round(total - 10000, 2)
+    percent_pl = round((pl / 10000) * 100, 2)
+    types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
+    data = {"portfolio": portfolio, "cash": usd(cash), "total": usd(total), "starting_amt": 10000, "username": username, "pl": pl, "percent_pl": percent_pl, "types": types}
+    return data
 
 
 def list_lookup(type):
