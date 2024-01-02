@@ -687,6 +687,73 @@ def register():
 
     else:
         return render_template("register.html")
+    
+# Api version of register
+@app.route("/api/register", methods=["POST"])
+def register_api():
+    """Register user"""
+    data = request.json
+    username = data.get("username")
+    email = data.get("email")
+    if not username:
+        return jsonify([{"error": {"code": 400, "message": "username not provided"}}]), 400
+    if not email:
+        return jsonify([{"error": {"code": 400, "message": "email not provided"}}]), 400
+    db.execute("SELECT username FROM users WHERE username = (%s)", (username,))
+    database = db.fetchall()
+    db.execute("SELECT email FROM users WHERE email = (%s)", (email,))
+    database_email = db.fetchall()
+    if (
+        len(database)
+        > 0 or len(database_email) > 0
+    ):
+        return jsonify([{"error": {"code": 400, "message": "username or email already exists"}}]), 400
+    password = data.get("password")
+    if not password:
+        return jsonify([{"error": {"code": 400, "message": "Did not enter a password"}}]), 400
+    # Register user
+    db.execute("INSERT INTO users (username, hash, email) VALUES(%s, %s, %s)", (username,generate_password_hash(password), email))
+    con.commit()
+    db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
+    user = db.fetchall()
+    # Create a progress section in the database for the user
+    db.execute("INSERT INTO progress (user_id, total_prog, mod_1, mod_2, mod_3, mod_4, mod_5, mod_6) VALUES(%s, 0, 0, 0, 0, 0, 0, 0)", (user[0]["id"],))
+    con.commit()
+    # generate token
+    access_token = create_access_token(user[0]["id"], username)
+    db.execute("INSERT INTO tokens_userid (id, tokens) VALUES(%s, %s)", (user[0]["id"], access_token))
+    con.commit()
+    return jsonify([{"username": username, "user_id": user[0]["id"], "email": email, "access_token": access_token}])
+
+# Api version of login
+@app.route("/api/login", methods=["POST"])
+def login_api():
+    """Register user"""
+    data = request.json
+    username = data.get("username")
+    if not username:
+        return jsonify([{"error": {"code": 403, "message": "username not provided"}}]), 403
+    password = data.get("password")
+    if not password:
+        return jsonify([{"error": {"code": 403, "message": "Did not enter a password"}}]), 403
+    db.execute("SELECT * FROM users WHERE username = (%s)", (username,))
+    database = db.fetchall()
+    # Check user exists and password is correct
+    if (
+        len(database)
+        != 1 or not check_password_hash(
+            database[0]["hash"], password
+        )
+    ):
+        return jsonify([{"error": {"code": 403, "message": "Incorrect username or password"}}]), 403
+    # Register user
+    db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
+    user = db.fetchall()
+    # getv access token
+    db.execute("SELECT tokens FROM tokens_userid WHERE id = (%s)", (user[0]["id"],))
+    access_token = db.fetchall()
+    access_token = access_token[0]["tokens"]
+    return jsonify([{"username": username, "user_id": user[0]["id"], "access_token": access_token}])
 
 
 @app.route("/sell", methods=["GET", "POST"])
