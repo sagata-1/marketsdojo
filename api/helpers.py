@@ -8,7 +8,7 @@ import uuid
 import openai
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask import redirect, render_template, session, jsonify, request
 from functools import wraps
 
@@ -52,8 +52,8 @@ def login_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        data = request.json
-        access_token = data.get("access_token")
+        data = request.headers
+        access_token = data.get("Authorization")
         if access_token is None:
             return jsonify({"error": {"code": 403, "message": "Missing access token"}})
         db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token,))
