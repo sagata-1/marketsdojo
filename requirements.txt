@@ -9,3 +9,4 @@ openai==1.3.8
 psycopg2-binary
 Flask-SqlAlchemy
 Flask-JWT-Extended
+flask-cors
