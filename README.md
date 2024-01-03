@@ -11,7 +11,7 @@ This is the documentation for the endpoints of the APIs I have completed so far 
 ### 1. Register API
 
 #### Endpoint
-`/vi/api/register`
+`/v1/api/register`
 
 #### Method
 `POST`
