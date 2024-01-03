@@ -115,13 +115,13 @@ The Portfolio API provides details of the user's stock portfolio. It requires au
 
 #### Authentication
 - This API requires an access token for authentication.
-- The access token must be provided as a value in a JSON object in the request header.
+- The access token must be provided as a value in the Authorization request header.
 
 #### Request Format
 - **Authenticated Request URL**: `https://marketsdojo.vercel.app/v1/api/portfolio`
 
 #### Query Parameters
-- `access_token` (string): The token used to authenticate the user's session.
+- `Authorization` (string): The token used to authenticate the user's session.
 
 #### Response
 - **Success (200 OK)**: Returns a JSON object with the following keys:
@@ -138,10 +138,13 @@ The Portfolio API provides details of the user's stock portfolio. It requires au
   - `{"error": {"code": 403, "message": "Invalid or Expired Access Token"}}` - If the provided access token is invalid or expired.
 
 #### Example Request
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6IkFybWFuIEphc3VqYSIsImlhdCI6MTcwNDE5MDI5MiwianRpIjoiMWI4N2Q1OTQtNWVkMy00ZDk3LWEzNTAtMGJlMzhlOTU4NzA1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MjYsIm5iZiI6MTcwNDE5MDI5MiwiY3NyZiI6IjBlNTBjMTZjLTNjMWItNDY0Ny1hYWFlLTgwMDY3OTdiYWU2YSIsImV4cCI6MTcwNDE5MTE5Mn0.WC6XDZs3tVyEHT8y3WN0SVxEUVkAoBdKKCmfzF6OVlk",
-}
+```
+POST https://marketsdojo.vercel.app/v1/api/portfolio
+request header
+
+  "Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6IkFybWFuIEphc3VqYSIsImlhdCI6MTcwNDE5MDI5MiwianRpIjoiMWI4N2Q1OTQtNWVkMy00ZDk3LWEzNTAtMGJlMzhlOTU4NzA1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MjYsIm5iZiI6MTcwNDE5MDI5MiwiY3NyZiI6IjBlNTBjMTZjLTNjMWItNDY0Ny1hYWFlLTgwMDY3OTdiYWU2YSIsImV4cCI6MTcwNDE5MTE5Mn0.WC6XDZs3tVyEHT8y3WN0SVxEUVkAoBdKKCmfzF6OVlk",
+  "Content-type: application/json"
+
 ```
 
 #### Example Response
@@ -170,10 +173,232 @@ The Portfolio API provides details of the user's stock portfolio. It requires au
 ### General Notes
 - This API endpoint is designed to be accessed by authenticated users only.
 
-## Routes to be deprecated- NOTE: DO NOT USE: These work on session data, not stateless access token data.
+---
+### 3. Buy Api
+
+**Route**: `/v1/api/buy` - Buy Assets
+
+**Description**:  
+This endpoint allows authenticated users to buy shares of various asset types including stocks, forex, CFDs, commodities, indices, and ETFs. The purchase is subject to several validations, including checking for valid symbols, matching asset types, and ensuring the user has sufficient funds.
+
+**HTTP Method**: `GET`
+
+**URL**: `https://marketsdojo.vercel.app/v1/api/buy`
+
+**Query Parameters**:
+
+- `symbol` (string): The ticker symbol of the asset to be purchased.
+- `shares` (int): The number of shares to buy.
+- `type` (string): The type of asset. Valid values include "Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF".
+
+**Headers**:
+
+- `Authorization` (string): Bearer token for user authentication.
+
+**Request Example**:
+
+```
+GET "https://marketsdojo.vercel.app/v1/api/buy?symbol=AAPL&shares=5&type=Stock%20(Equity)" \
+-H "Authorization: <ACCESS_TOKEN>"
+```
+
+**Success Response**:
+
+- **Code**: `200 OK`
+- **Content Example**:
+  ```json
+  {
+    "symbol": "AAPL",
+    "num_shares": 5,
+    "type": "Stock (Equity)"
+  }
+  ```
+
+**Error Response**:
+
+- **Missing or Incorrect Parameters**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Missing or incorrect query parameters"
+      }
+    }
+    ```
+- **Invalid Symbol**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Invalid Symbol"
+      }
+    }
+    ```
+- **Asset Type Does Not Match Symbol**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Asset type does not match symbol"
+      }
+    }
+    ```
+- **Invalid Shares**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Invalid shares"
+      }
+    }
+    ```
+- **Cannot Trade on a Weekend**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Cannot trade on a weekend!"
+      }
+    }
+    ```
+- **Non-Forex Assets Trading Time Restriction**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)"
+      }
+    }
+    ```
+
+---
+### 4. Sell API
+
+**Route**: `/v1/api/sell` - Sell Shares of Stock
+
+**Description**:  
+This endpoint enables authenticated users to sell shares of various asset types, including stocks, forex, CFDs, commodities, indices, and ETFs. It includes checks for valid symbols and asset types, as well as ensuring the user has the specified number of shares to sell.
+
+**HTTP Method**: `GET`
+
+**URL**: `https://marketsdojo.vercel.app/v1/api/sell`
+
+**Query Parameters**:
+
+- `symbol` (string): The ticker symbol of the asset to be sold.
+- `shares` (int): The number of shares to sell.
+- `type` (string): The type of asset. Valid values include "Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF".
+
+**Headers**:
+
+- `Authorization` (string): Access token for user authentication.
+
+**Request Example**:
+
+```
+GET "https://marketsdojo.vercel.app/v1/api/sell?symbol=AAPL&shares=5&type=Stock%20(Equity)" \
+-H "Authorization: <ACCESS_TOKEN>"
+```
+
+**Success Response**:
+
+- **Code**: `200 OK`
+- **Content Example**:
+  ```json
+  {
+    "symbol": "AAPL",
+    "num_shares": 5,
+    "type": "Stock (Equity)"
+  }
+  ```
+
+**Error Response**:
+
+- **Missing or Incorrect Parameters**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Missing or incorrect query parameters"
+      }
+    }
+    ```
+- **Invalid Symbol**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Invalid Symbol"
+      }
+    }
+    ```
+- **Asset Type Does Not Match Symbol**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Asset type does not match symbol"
+      }
+    }
+    ```
+- **Invalid Shares**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Invalid shares"
+      }
+    }
+    ```
+- **Too Many Shares**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Too many shares"
+      }
+    }
+    ```
+- **Non-Forex Assets Trading Time Restriction**:
+  - **Code**: `400 Bad Request`
+  - **Content**: 
+    ```json
+    {
+      "error": {
+        "code": 400,
+        "message": "Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)"
+      }
+    }
+    ```
+
+---
+
+## Legacy Routes to be deprecated- NOTE: DO NOT USE: These work on session data, not stateless access token data.
 
 
-### 2. Buy API
+### 2. Old Buy API
 
 **Endpoint Description**: This endpoint is used to buy shares of stock.
 
@@ -209,7 +434,7 @@ Redirects to https://marketsdojo.vercel.app/portfolio_api
 
 ---
 
-### 3. Sell API
+### 3. Old Sell API
 
 **Endpoint Description**: Allows users to sell shares of stock.
 
