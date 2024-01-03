@@ -52,13 +52,14 @@ def login_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        access_token = request.args.get("access_token")
+        data = request.json
+        access_token = data.get("access_token")
         if access_token is None:
             return jsonify({"error": {"code": 403, "message": "Missing access token"}})
         db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token,))
         id = db.fetchall()
         if len(id) != 1:
-            return jsonify({"error": {"code": 403, "message": "Invalid Access Token"}})
+            return jsonify({"error": {"code": 403, "message": "Invalid or Expired Access Token"}})
         
         return f(*args, **kwargs, access_token=access_token)
 
@@ -182,30 +183,28 @@ def leaderboard():
 def login_api(request):
     """Register user"""
     data = request
-    username = data.get("username")
-    if not username:
-        return [{"error": {"code": 403, "message": "username not provided"}}]
+    email = data.get("email")
+    if not email:
+        return {"error": {"code": 403, "message": "email not provided"}}
     password = data.get("password")
     if not password:
-        return [{"error": {"code": 403, "message": "Did not enter a password"}}]
-    db.execute("SELECT * FROM users WHERE username = (%s)", (username,))
-    database = db.fetchall()
+        return {"error": {"code": 403, "message": "Did not enter a password"}}
+    db.execute("SELECT * FROM users WHERE email = (%s)", (email,))
+    user = db.fetchall()
     # Check user exists and password is correct
     if (
-        len(database)
+        len(user)
         != 1 or not check_password_hash(
-            database[0]["hash"], password
+            user[0]["hash"], password
         )
     ):
-        return [{"error": {"code": 403, "message": "Incorrect username and/or password"}}]
-    # Register user
-    db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
-    user = db.fetchall()
+        return {"error": {"code": 403, "message": "Incorrect email and/or password"}}
+    # Get user data that is important
+    db.execute("SELECT id FROM users WHERE email = (%s)", (email,))
     # getv access token
     db.execute("SELECT tokens FROM tokens_userid WHERE id = (%s)", (user[0]["id"],))
     access_token = db.fetchall()
-    access_token = access_token[0]["tokens"]
-    return [{"username": username, "user_id": user[0]["id"], "access_token": access_token}]
+    return {"username": user[0]["username"], "user_id": user[0]["id"], "email":email ,"access_token": access_token[0]["tokens"]}
 
 # Api version of register
 def register_api(request):
