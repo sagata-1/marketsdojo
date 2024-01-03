@@ -11,7 +11,7 @@ This is the documentation for the endpoints of the APIs I have completed so far 
 ### 1. Register API
 
 #### Endpoint
-`/api/register`
+`/vi/api/register`
 
 #### Method
 `POST`
@@ -58,30 +58,30 @@ Registers a new user in the system. This endpoint accepts JSON data containing t
 ### 2. Login API
 
 #### Endpoint
-`/api/login`
+`/v1/api/login`
 
 #### Method
 `POST`
 
 #### Description
-Allows a user to log in to the system. The endpoint accepts JSON data with the user's username and password. It verifies the user's credentials and, if successful, returns the user's `username`, `user_id`, and an `access_token`.
+Allows a user to log in to the system. The endpoint accepts JSON data with the user's email and password. It verifies the user's credentials and, if successful, returns the user's `username`, `email`, `user_id`, and an `access_token`.
 
 #### Request JSON Object
-- `username` (string): The username of the user trying to log in.
+- `email` (string): The email of the user trying to log in.
 - `password` (string): The password of the user.
 
 #### Response
 - **Success (200 OK)**:
-  - Returns JSON containing the user's `username`, `user_id`, and `access_token`.
+  - Returns JSON containing the user's `username`, `email`, `user_id`, and `access_token`.
 - **Error (403 Forbidden)**:
-  - `{"error": {"code": 403, "message": "username not provided"}}` - Username missing.
+  - `{"error": {"code": 403, "message": "email not provided"}}` - Username missing.
   - `{"error": {"code": 403, "message": "Did not enter a password"}}` - Password missing.
-  - `{"error": {"code": 403, "message": "Incorrect username or password"}}` - Incorrect credentials.
+  - `{"error": {"code": 403, "message": "Incorrect email and/or password"}}` - Incorrect credentials.
 
 #### Example Request
 ```json
 {
-  "username": "existinguser",
+  "email": "existinguser@gamil.com",
   "password": "password123"
 }
 ```
@@ -90,6 +90,7 @@ Allows a user to log in to the system. The endpoint accepts JSON data with the u
 ```json
 {
   "username": "existinguser",
+  "email": "existinguser@gamil.com",
   "user_id": 2,
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
@@ -104,20 +105,20 @@ Allows a user to log in to the system. The endpoint accepts JSON data with the u
 ### 3. Portfolio API
 
 #### Endpoint
-`/api/portfolio`
+`/v1/api/portfolio`
 
 #### Method
-`GET`
+`POST`
 
 #### Description
 The Portfolio API provides details of the user's stock portfolio. It requires authentication via an access token. The endpoint retrieves the user's portfolio, updates the current prices of the stocks, calculates the total value and profit/loss, and returns detailed portfolio information including the user's cash on hand and various types of investments.
 
 #### Authentication
 - This API requires an access token for authentication.
-- The access token must be provided as a query parameter in the request URL.
+- The access token must be provided as a value in a JSON object in the request header.
 
 #### Request Format
-- **Authenticated Request URL**: `https://marketsdojo.vercel.app/api/portfolio?access_token=YOUR_ACCESS_TOKEN`
+- **Authenticated Request URL**: `https://marketsdojo.vercel.app/v1/api/portfolio`
 
 #### Query Parameters
 - `access_token` (string): The token used to authenticate the user's session.
@@ -134,11 +135,13 @@ The Portfolio API provides details of the user's stock portfolio. It requires au
   - `types`: An array of investment types (e.g., Stock (Equity), Forex, Index, ETF, CFD, Commodity).
 - **Error (403 Forbidden)**:
   - `{"error": {"code": 403, "message": "Missing access token"}}` - If the access token is not provided in the request.
-  - `{"error": {"code": 403, "message": "Invalid Access Token"}}` - If the provided access token is invalid or expired.
+  - `{"error": {"code": 403, "message": "Invalid or Expired Access Token"}}` - If the provided access token is invalid or expired.
 
 #### Example Request
-```
-GET https://marketsdojo.vercel.app/api/portfolio?access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6IkFybWFuIEphc3VqYSIsImlhdCI6MTcwNDE5MDI5MiwianRpIjoiMWI4N2Q1OTQtNWVkMy00ZDk3LWEzNTAtMGJlMzhlOTU4NzA1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MjYsIm5iZiI6MTcwNDE5MDI5MiwiY3NyZiI6IjBlNTBjMTZjLTNjMWItNDY0Ny1hYWFlLTgwMDY3OTdiYWU2YSIsImV4cCI6MTcwNDE5MTE5Mn0.WC6XDZs3tVyEHT8y3WN0SVxEUVkAoBdKKCmfzF6OVlk",
+}
 ```
 
 #### Example Response

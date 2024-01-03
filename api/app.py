@@ -94,7 +94,7 @@ def index():
     types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
     return render_template("index.html", portfolio=portfolio, cash=usd(cash), total=usd(total), username=username, assets=assets, pl = pl, percent_pl = percent_pl, types=types)
 
-@app.route("/api/portfolio")
+@app.route("/v1/api/portfolio", methods=["POST"])
 @login_required
 def portfolio_api(access_token):
     """Show portfolio of stocks"""
@@ -688,7 +688,7 @@ def register():
         return render_template("register.html")
     
 # Api version of register
-@app.route("/api/register", methods=["POST"])
+@app.route("/v1/api/register", methods=["POST"])
 def register_api():
     """Register user"""
     data = request.json
@@ -725,34 +725,32 @@ def register_api():
     return jsonify({"username": username, "user_id": user[0]["id"], "email": email, "access_token": access_token})
 
 # Api version of login
-@app.route("/api/login", methods=["POST"])
+@app.route("/v1/api/login", methods=["POST"])
 def login_api():
     """Register user"""
     data = request.json
-    username = data.get("username")
-    if not username:
-        return jsonify({"error": {"code": 403, "message": "username not provided"}}), 403
+    email = data.get("email")
+    if not email:
+        return jsonify({"error": {"code": 403, "message": "email not provided"}}), 403
     password = data.get("password")
     if not password:
         return jsonify({"error": {"code": 403, "message": "Did not enter a password"}}), 403
-    db.execute("SELECT * FROM users WHERE username = (%s)", (username,))
-    database = db.fetchall()
+    db.execute("SELECT * FROM users WHERE email = (%s)", (email,))
+    user = db.fetchall()
     # Check user exists and password is correct
     if (
-        len(database)
+        len(user)
         != 1 or not check_password_hash(
-            database[0]["hash"], password
+            user[0]["hash"], password
         )
     ):
-        return jsonify({"error": {"code": 403, "message": "Incorrect username or password"}}), 403
-    # Register user
-    db.execute("SELECT id FROM users WHERE username = (%s)", (username,))
-    user = db.fetchall()
+        return jsonify({"error": {"code": 403, "message": "Incorrect email and/or password"}}), 403
+    # Get user data that is important
+    db.execute("SELECT id FROM users WHERE email = (%s)", (email,))
     # getv access token
     db.execute("SELECT tokens FROM tokens_userid WHERE id = (%s)", (user[0]["id"],))
     access_token = db.fetchall()
-    access_token = access_token[0]["tokens"]
-    return jsonify({"username": username, "user_id": user[0]["id"], "access_token": access_token})
+    return jsonify({"username": user[0]["username"], "user_id": user[0]["id"], "email":email ,"access_token": access_token[0]["tokens"]})
 
 
 @app.route("/sell", methods=["GET", "POST"])
