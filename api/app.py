@@ -408,27 +408,27 @@ def buy():
         flash("Bought!")
     return redirect("/")
 
-@app.route("/api/buy", methods=["GET"])
+@app.route("/v1/api/buy", methods=["GET"])
 @login_required
-def buy_api():
+def buy_api(access_token):
     """Buy shares of stock"""
     # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
     symbol = request.args.get("symbol")
     num_shares = request.args.get("shares")
     type = request.args.get("type")
     if symbol == None or num_shares == None or type == None:
-        return {400: "Missing or incorrect query parameters"}
+        return jsonify({"error":{"code": 400, "message": "Missing or incorrect query parameters"}}), 400
     symbol = symbol.upper()
     stock = lookup(symbol, type)
     if not stock:
-        return {400:"Invalid Symbol"}
+        return jsonify({"error":{"code": 400, "message": "Invalid Symbol"}}), 400
     if stock["exchange"] and type and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
-        return {400: "Asset Type does not match symbol"}
+        return jsonify({"error":{"code": 400, "message": "Asset type does not match symbol"}}), 400
     if not num_shares.isdigit():
-        return {400: "Invalid Shares"}
+        return jsonify({"error":{"code": 400, "message": "Invalid shares"}}), 400
     num_shares = int(num_shares)
     if num_shares < 1:
-        return {400: "Invalid Shares"}
+        return jsonify({"error":{"code": 400, "message": "Invalid shares"}}), 400
     price = stock["price"]
     # Create a datetime object in UTC
     utc_dt = datetime.datetime.now(pytz.timezone("UTC"))
@@ -442,19 +442,22 @@ def buy_api():
     # Can only buy when market is open
     if type and type != "Forex":
         if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
-            return {400: "Cannot trade on a weekend!"}
+            return jsonify({"error":{"code": 400, "message": "Cannot trade on a weekend!"}}), 400
         if time < open_time or time > close_time:
-            return {400: "Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)"}
+            return jsonify({"error":{"code": 400, "message": "Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)"}}), 400
     else:
         if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
-            return {400: "You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)"}
+            return jsonify({"error":{"code": 400, "message": "You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)"}}), 400
     db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
     user = db.fetchall()
     if (num_shares * price) > user[0]["cash"]:
-        return {400: "Cannot Afford"}
+        return jsonify({"error":{"code": 400, "message": "Cannot afford"}}), 400
+    db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token, ))
+    user_id = db.fetchall()
+    user_id = user_id[0]["id"]
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
-        (session["user_id"],
+        (user_id,
         symbol,
         type)
     )
@@ -462,63 +465,62 @@ def buy_api():
     # Start a stock for a new user if it doesn't exist
     time = time.strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
-        db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
-            (session["user_id"],
-            stock["name"],
-            stock["symbol"],
-            price,
-            num_shares,
-            time,
-            type)
-        )
-        con.commit()
-        db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
-            (session["user_id"],
-            stock["symbol"],
-            price,
-            num_shares,
-            time)
-        )
-        con.commit()
-        db.execute(
-            "UPDATE users SET cash = cash - (%s), bought = bought + 1  WHERE id = (%s)",
-            (num_shares * price,
-            session["user_id"])
-        )
-        con.commit()
+        try:
+            db.execute(
+                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                (user_id,
+                stock["name"],
+                stock["symbol"],
+                price,
+                num_shares,
+                time,
+                type)
+            )
+            db.execute(
+                "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                (user_id,
+                stock["symbol"],
+                price,
+                num_shares,
+                time)
+            )
+            db.execute(
+                "UPDATE users SET cash = cash - (%s), bought = bought + 1  WHERE id = (%s)",
+                (num_shares * price,
+                user_id)
+            )
+            con.commit()
+        except Exception as e:
+            con.rollback()
+            return jsonify({"error":{"code": 400, "message": "Transaction failed, rollback performed"}})
     # Update current portfolio
     else:
-        db.execute(
-            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
-            (price,
-            num_shares,
-            session["user_id"],
-            stock["symbol"])
-        )
-        con.commit()
-        db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
-            (session["user_id"],
-            stock["symbol"],
-            price,
-            num_shares,
-            time)
-        )
-        con.commit()
-        db.execute(
-            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
-            (num_shares * price,
-            session["user_id"])
-        )
-        con.commit()
-    db.execute (
-        "SELECT bought FROM users WHERE id = (%s)", (session["user_id"], )
-    )
-    bought = db.fetchall()
-    bought = bought[0]["bought"]
-    return redirect("/portfolio_api")
+        try:
+            db.execute(
+                "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
+                (price,
+                num_shares,
+                user_id,
+                stock["symbol"])
+            )
+            db.execute(
+                "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                (user_id,
+                stock["symbol"],
+                price,
+                num_shares,
+                time)
+            )
+            db.execute(
+                "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
+                (num_shares * price,
+                user_id)
+            )
+            con.commit()
+        except Exception as e:
+            con.rollback()
+            return jsonify({"error":{"code": 400, "message": "Transaction failed, rollback performed"}})
+    return jsonify({"symbol": symbol, "num_shares": num_shares, "type": type}), 200
 
 
 @app.route("/history")
@@ -868,21 +870,24 @@ def sell():
         flash("Sold!")
     return redirect("/")
 
-@app.route("/api/sell", methods=["GET"])
+@app.route("/v1/api/sell", methods=["GET"])
 @login_required
-def sell_api():
+def sell_api(access_token):
     """Sell shares of stock"""
     # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
     type = request.args.get("type")
     symbol = request.args.get("symbol")
     num_shares = request.args.get("shares")
     if not type or not symbol or not num_shares:
-        return {400: "Missing or inccorect query parameters!"}
+        return jsonify({"error":{"code": 400, "message": "Missing or incorrect query parameters"}}), 400
     symbol = symbol.upper()
+    db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token, ))
+    user_id = db.fetchall()
+    user_id = user_id[0]["id"]
     db.execute(
         "SELECT * FROM portfolios WHERE stock_symbol = (%s) AND user_id = (%s) AND type = (%s)",
         (symbol,
-        session["user_id"],
+        user_id,
         type)
     )
     stock = db.fetchall()
@@ -890,16 +895,16 @@ def sell_api():
     types = db.fetchall()
     type_ans = types[0]["type"]
     if type != type_ans:
-        return {400: "Asset Type does not match symbol"}
+        return jsonify({"error":{"code": 400, "message": "Asset type does not match symbol"}}), 400
     if len(stock) != 1:
-        return {400:"Invalid Symbol"}
+        return jsonify({"error":{"code": 400, "message": "Invalid symbol"}}), 400
     if not num_shares.isdigit():
-        return {400:"Invalid Shares"}
+        return jsonify({"error":{"code": 400, "message": "Invalid shares"}}), 400
     num_shares = (int(num_shares)) * -1
     if num_shares > 0:
-        return {400: "Invalid Shares"}
+        return jsonify({"error":{"code": 400, "message": "Invalid Shares"}}), 400
     if stock[0]["num_shares"] + num_shares < 0:
-        return {400: "Too many shares"}
+        return jsonify({"error":{"code": 400, "message": "Too many shares"}}), 400
      # Create a datetime object in UTC
     utc_dt = datetime.datetime.now(pytz.timezone("UTC"))
 
@@ -911,68 +916,67 @@ def sell_api():
     # Error checking (i.e. missing symbol, too many shares sold etc)
     if type and type != "Forex":
         if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
-            return {400: "Cannot trade on a weekend!"}
+            return jsonify({"error":{"code": 400, "message": "Cannot trade on a weekend!"}}), 400
         if time < open_time or time > close_time:
-            return {400: "Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes) "}
+            return jsonify({"error":{"code": 400, "message": "Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)"}}), 400
     else:
         if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
-            return {400: "You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)"}
+            return jsonify({"error":{"code": 400, "message": "You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)"}}), 400
     # Keep track of sells
     time = time.strftime("%Y-%m-%d %H:%M:%S")
     # Update current portfolio
     price = lookup(symbol, type)["price"]
     if stock[0]["num_shares"] + num_shares == 0:
-        db.execute(
-            "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
-            (session["user_id"],
-            symbol)
-        )
-        con.commit()
-        db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
-            (session["user_id"],
-            symbol,
-            price,
-            num_shares,
-            time)
-        )
-        con.commit()
-        db.execute(
-            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
-            (num_shares * price,
-            session["user_id"])
-        )
-        con.commit()
+        try:
+            db.execute(
+                "DELETE FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
+                (user_id,
+                symbol)
+            )
+            db.execute(
+                "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                (user_id,
+                symbol,
+                price,
+                num_shares,
+                time)
+            )
+            db.execute(
+                "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
+                (num_shares * price,
+                user_id)
+            )
+            con.commit()
+        except Exception as e:
+            con.rollback()
+            return jsonify({"error":{"code": 400, "message": "Transaction failed, rollback performed"}})
     else:
-        db.execute(
-            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
-            (price,
-            num_shares,
-            session["user_id"],
-            symbol)
-        )
-        con.commit()
-        db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
-            (session["user_id"],
-            symbol,
-            price,
-            num_shares,
-            time)
-        )
-        con.commit()
-        db.execute(
-            "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
-            (num_shares * price,
-            session["user_id"])
-        )
-        con.commit()
-    db.execute (
-        "SELECT sold FROM users WHERE id = (%s)", (session["user_id"], )
-    )
-    sold = db.fetchall()
-    sold = sold[0]["sold"]
-    return redirect("/portfolio_api")
+        try:
+            db.execute(
+                "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) AND stock_symbol = (%s)",
+                (price,
+                num_shares,
+                user_id,
+                symbol)
+            )
+            db.execute(
+                "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                (user_id,
+                symbol,
+                price,
+                num_shares,
+                time)
+            )
+            db.execute(
+                "UPDATE users SET cash = cash - (%s), sold = sold + 1 WHERE id = (%s)",
+                (num_shares * price,
+                user_id)
+            )
+            con.commit()
+        except Exception as e:
+            con.rollback()
+            return jsonify({"error":{"code": 400, "message": "Transaction failed, rollback performed"}})
+    return jsonify({"symbol": symbol, "num_shares": num_shares, "type": type}), 200
 
 @app.route("/password-change", methods=["GET", "POST"])
 @login_required
