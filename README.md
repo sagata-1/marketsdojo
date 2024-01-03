@@ -74,7 +74,7 @@ Allows a user to log in to the system. The endpoint accepts JSON data with the u
 - **Success (200 OK)**:
   - Returns JSON containing the user's `username`, `email`, `user_id`, and `access_token`.
 - **Error (403 Forbidden)**:
-  - `{"error": {"code": 403, "message": "email not provided"}}` - Username missing.
+  - `{"error": {"code": 403, "message": "email not provided"}}` - Email missing.
   - `{"error": {"code": 403, "message": "Did not enter a password"}}` - Password missing.
   - `{"error": {"code": 403, "message": "Incorrect email and/or password"}}` - Incorrect credentials.
 
