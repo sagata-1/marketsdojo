@@ -13,9 +13,11 @@ from urllib.parse import quote_plus
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import create_access_token
+from flask_cors import CORS
 
 # Configure application
 app = Flask(__name__)
+CORS(app)
 encoded_password = quote_plus("Saucepan03@!")
 
 # Custom filter
