@@ -107,15 +107,15 @@ def portfolio_api(access_token):
         "SELECT * FROM portfolios WHERE user_id = (%s)", (user_id,)
     )
     portfolio = db.fetchall()
-    for stock in portfolio:
-        db.execute(
-            "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
-            (lookup(stock["stock_symbol"], stock["type"])["price"],
-            user_id,
-            stock["stock_symbol"],
-            stock["type"])
-        )
-        con.commit()
+    # for stock in portfolio:
+    #     db.execute(
+    #         "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
+    #         (lookup(stock["stock_symbol"], stock["type"])["price"],
+    #         user_id,
+    #         stock["stock_symbol"],
+    #         stock["type"])
+    #     )
+    #     con.commit()
     db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
     cash = db.fetchall()
     cash = float(cash[0]["cash"])
@@ -126,7 +126,7 @@ def portfolio_api(access_token):
     portfolio = db.fetchall()
     total = cash
     for stock in portfolio:
-        total += stock["price"] * stock["num_shares"]
+        total += stock["avg_cost"] * stock["quantity"]
     db.execute("SELECT username FROM users WHERE id = (%s)", (user_id,))
     username = db.fetchall()
     username = username[0]["username"]
@@ -467,21 +467,21 @@ def buy_api(access_token):
     if (len(portfolio)) == 0:
         try:
             db.execute(
-                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, avg_cost, quantity,type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
                 (user_id,
                 stock["name"],
                 stock["symbol"],
-                price,
+                1,
                 num_shares,
-                time,
                 type)
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount,time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
                 (user_id,
                 stock["symbol"],
                 price,
                 num_shares,
+                num_shares * price,
                 time)
             )
             db.execute(
@@ -497,18 +497,19 @@ def buy_api(access_token):
     else:
         try:
             db.execute(
-                "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
-                (price,
+                "UPDATE portfolios SET avg_cost = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
+                (1,
                 num_shares,
                 user_id,
                 stock["symbol"])
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
                 (user_id,
                 stock["symbol"],
                 price,
                 num_shares,
+                num_shares * price,
                 time)
             )
             db.execute(
@@ -521,7 +522,6 @@ def buy_api(access_token):
             con.rollback()
             return jsonify({"error":{"code": 400, "message": "Transaction failed, rollback performed"}})
     return jsonify({"symbol": symbol, "num_shares": num_shares, "type": type}), 200
-
 
 @app.route("/history")
 @login_required
@@ -934,7 +934,7 @@ def sell_api(access_token):
                 symbol)
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
                 (user_id,
                 symbol,
                 price,
@@ -960,7 +960,7 @@ def sell_api(access_token):
                 symbol)
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
                 (user_id,
                 symbol,
                 price,
