@@ -452,6 +452,8 @@ def lookup(symbol, type):
 
     # Query API
     try:
+        if type not in ["CFD", "Forex", "Commodity", "Index", "ETF", "Stock (Equity)"]:
+            return None
         response = requests.get(url,
         cookies={"session": str(uuid.uuid4())},
         headers={"User-Agent": "python-requests", "Accept": "*/*"},
