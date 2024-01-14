@@ -423,13 +423,13 @@ def buy_api(access_token):
     num_shares = data.get("shares")
     asset_type = data.get("type")
 
-    if symbol == None or num_shares == None or type == None:
+    if symbol == None or num_shares == None or asset_type == None:
         return jsonify({"error":{"code": 400, "message": "Missing or incorrect query parameters"}}), 400
     symbol = symbol.upper()
     stock = lookup(symbol, asset_type)
     if not stock:
         return jsonify({"error":{"code": 400, "message": "Invalid Symbol"}}), 400
-    if stock["exchange"] and type and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
+    if stock["exchange"] and asset_type and (stock["exchange"] == "FOREX" and asset_type != "Forex" or stock["exchange"] != "FOREX" and asset_type == "Forex"):
         return jsonify({"error":{"code": 400, "message": "Asset type does not match symbol"}}), 400
     if not num_shares.isdigit():
         return jsonify({"error":{"code": 400, "message": "Invalid shares"}}), 400
@@ -455,13 +455,13 @@ def buy_api(access_token):
     else:
         if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
             return jsonify({"error":{"code": 400, "message": "You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)"}}), 400
-    db.execute("SELECT * FROM users WHERE id = (%s)", (session["user_id"],))
-    user = db.fetchall()
-    if (num_shares * price) > user[0]["cash"]:
-        return jsonify({"error":{"code": 400, "message": "Cannot afford"}}), 400
     db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token, ))
     user_id = db.fetchall()
     user_id = user_id[0]["id"]
+    db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
+    user = db.fetchall()
+    if (num_shares * price) > user[0]["cash"]:
+        return jsonify({"error":{"code": 400, "message": "Cannot afford"}}), 400
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
         (user_id,
