@@ -431,9 +431,8 @@ def buy_api(access_token):
         return jsonify({"error":{"code": 400, "message": "Invalid Symbol"}}), 400
     if stock["exchange"] and asset_type and (stock["exchange"] == "FOREX" and asset_type != "Forex" or stock["exchange"] != "FOREX" and asset_type == "Forex"):
         return jsonify({"error":{"code": 400, "message": "Asset type does not match symbol"}}), 400
-    if not num_shares.isdigit():
-        return jsonify({"error":{"code": 400, "message": "Invalid shares"}}), 400
-    num_shares = int(num_shares)
+    if (type(num_shares) != int):
+        return jsonify({"error":{"code": 400, "message": "Shares must be an integer!"}}), 400
     if num_shares < 1:
         return jsonify({"error":{"code": 400, "message": "Invalid shares"}}), 400
     price = stock["price"]
