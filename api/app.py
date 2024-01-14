@@ -430,12 +430,12 @@ def buy_api():
     data=request.json
     symbol = data.get("symbol")
     num_shares = data.get("shares")
-    type = data.get("type")
+    asset_type = data.get("type")
 
     if symbol == None or num_shares == None or type == None:
         return jsonify({"error":{"code": 400, "message": "Missing or incorrect query parameters"}}), 400
     symbol = symbol.upper()
-    stock = lookup(symbol, type)
+    stock = lookup(symbol, asset_type)
     if not stock:
         return jsonify({"error":{"code": 400, "message": "Invalid Symbol"}}), 400
     if stock["exchange"] and type and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
@@ -475,7 +475,7 @@ def buy_api():
         "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
         (user_id,
         symbol,
-        type)
+        asset_type)
     )
     db.execute(
         "SELECT us"
@@ -494,7 +494,7 @@ def buy_api():
                 price,
                 price * num_shares,
                 num_shares,
-                type)
+                asset_type)
             )
             db.execute(
                 "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
@@ -543,7 +543,7 @@ def buy_api():
         except Exception as e:
             con.rollback()
             return jsonify({"error":{"code": 400, "message": "Transaction failed, rollback performed"}})
-    return jsonify({"symbol": symbol, "num_shares": num_shares, "type": type}), 200
+    return jsonify({"symbol": symbol, "num_shares": num_shares, "type": asset_type}), 200
 
 @app.route("/history")
 @login_required
