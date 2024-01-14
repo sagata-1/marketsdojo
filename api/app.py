@@ -417,16 +417,7 @@ def buy():
 
 @app.route("/v1/api/buy", methods=["POST"])
 @login_required
-def buy_api():
-    '''
-        Check if the Authorization header is present
-    '''
-    if 'Authorization' not in request.headers:
-        return jsonify({"error":{"code": 400, "message": "Missing Authorization Header"}}), 400
-    '''
-        If the Authorization header is present, check if the access token is valid and extract other data from request payload
-    '''
-    access_token = request.headers["Authorization"]
+def buy_api(access_token):
     data=request.json
     symbol = data.get("symbol")
     num_shares = data.get("shares")
