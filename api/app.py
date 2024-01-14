@@ -103,10 +103,10 @@ def portfolio_api(access_token):
     db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token, ))
     user_id = db.fetchall()
     user_id = user_id[0]["id"]
-    db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s)", (user_id,)
-    )
-    portfolio = db.fetchall()
+    # db.execute(
+    #     "SELECT * FROM portfolios WHERE user_id = (%s)", (user_id,)
+    # )
+    # portfolio = db.fetchall()
     # for stock in portfolio:
     #     db.execute(
     #         "UPDATE portfolios set price = (%s) WHERE user_id = (%s) AND stock_symbol = (%s) and type = (%s)",
@@ -408,14 +408,21 @@ def buy():
         flash("Bought!")
     return redirect("/")
 
-@app.route("/v1/api/buy", methods=["GET"])
+@app.route("/v1/api/buy", methods=["POST"])
 @login_required
-def buy_api(access_token):
+def buy_api():
     """Buy shares of stock"""
     # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
     symbol = request.args.get("symbol")
     num_shares = request.args.get("shares")
     type = request.args.get("type")
+    '''
+        Check if the Authorization header is present
+    '''
+    if 'Authorization' not in request.headers:
+        return jsonify({"error":{"code": 400, "message": "Missing Authorization Header"}}), 400
+    access_token = request.headers["Authorization"]
+
     if symbol == None or num_shares == None or type == None:
         return jsonify({"error":{"code": 400, "message": "Missing or incorrect query parameters"}}), 400
     symbol = symbol.upper()
@@ -461,22 +468,27 @@ def buy_api(access_token):
         symbol,
         type)
     )
+    db.execute(
+        "SELECT us"
+    )
+
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
     time = time.strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
         try:
             db.execute(
-                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, avg_cost, quantity,type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, avg_cost, invested_amount, quantity,type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
                 (user_id,
                 stock["name"],
                 stock["symbol"],
-                1,
+                price,
+                price * num_shares,
                 num_shares,
                 type)
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount,time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
                 (user_id,
                 stock["symbol"],
                 price,
@@ -497,14 +509,15 @@ def buy_api(access_token):
     else:
         try:
             db.execute(
-                "UPDATE portfolios SET avg_cost = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
+                "UPDATE portfolios SET avg_cost = (%s), num_shares = num_shares + (%s), invested_amount = (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
                 (1,
                 num_shares,
+                999,
                 user_id,
                 stock["symbol"])
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
                 (user_id,
                 stock["symbol"],
                 price,
