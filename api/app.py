@@ -17,7 +17,7 @@ from flask_cors import CORS
 
 # Configure application
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/v1/api": {"origins": "*"}})
 encoded_password = quote_plus("Saucepan03@!")
 
 # Custom filter
@@ -408,20 +408,29 @@ def buy():
         flash("Bought!")
     return redirect("/")
 
+
+'''
+    @post-condition:Buy shares of stock
+    @pre-condition:Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
+    @pre-condition:Expects data to be sent in application/json format
+'''
+
 @app.route("/v1/api/buy", methods=["POST"])
 @login_required
 def buy_api():
-    """Buy shares of stock"""
-    # Expects user to be logged in, and types is one of ["Forex", "Stock (Equity)", "CFD", "Commodity", "Index", "ETF"]
-    symbol = request.args.get("symbol")
-    num_shares = request.args.get("shares")
-    type = request.args.get("type")
     '''
         Check if the Authorization header is present
     '''
     if 'Authorization' not in request.headers:
         return jsonify({"error":{"code": 400, "message": "Missing Authorization Header"}}), 400
+    '''
+        If the Authorization header is present, check if the access token is valid and extract other data from request payload
+    '''
     access_token = request.headers["Authorization"]
+    data=request.json
+    symbol = data.get("symbol")
+    num_shares = data.get("shares")
+    type = data.get("type")
 
     if symbol == None or num_shares == None or type == None:
         return jsonify({"error":{"code": 400, "message": "Missing or incorrect query parameters"}}), 400
