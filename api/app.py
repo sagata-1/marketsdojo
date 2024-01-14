@@ -17,7 +17,7 @@ from flask_cors import CORS
 
 # Configure application
 app = Flask(__name__)
-CORS(app, resources={r"/v1/api": {"origins": "*"}})
+CORS(app)
 encoded_password = quote_plus("Saucepan03@!")
 
 # Custom filter
