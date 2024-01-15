@@ -446,7 +446,7 @@ def buy_api(access_token):
     time = utc_minus_5_dt
     # Error checking (i.e. missing symbol, too many shares bought etc)
     # Can only buy when market is open
-    if type and type != "Forex":
+    if asset_type and asset_type != "Forex":
         if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
             return jsonify({"error":{"code": 400, "message": "Cannot trade on a weekend!"}}), 400
         if time < open_time or time > close_time:
@@ -467,10 +467,6 @@ def buy_api(access_token):
         symbol,
         asset_type)
     )
-    db.execute(
-        "SELECT us"
-    )
-
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
     time = time.strftime("%Y-%m-%d %H:%M:%S")
