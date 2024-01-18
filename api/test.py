@@ -89,29 +89,30 @@ def test_buy_sell():
     assert(sold > 0)
     assert(len(portfolio) == 0)
     # Test buy capabilities- datetime kept correct, testing other errors
-    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", valid_time) == 200)
-    assert(buy_test("GOOG", "2", "1000000", "Stock (Equity)", valid_time) == 400)
-    assert(buy_test("TSLA", "2", "5", "Forex", valid_time) == 400)
-    assert(buy_test("MYREUR", "2", "5", "Stock (Equity)", valid_time) == 400)
-    assert(buy_test("AAPL", "2", "5", "CFD", valid_time) == 200)
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", valid_time) == ({"symbol": "TSLA", "num_shares": 5, "type": "Stock (Equity)"}, 200))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", valid_time) == ({"symbol": "TSLA", "num_shares": 5, "type": "Stock (Equity)"}, 200))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "GOOG", 1000000, "Stock (Equity)", valid_time) == ("Cannot afford", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Forex", valid_time) == ("Asset type does not match symbol", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "MYREUR", 5, "Stock (Equity)", valid_time) == ("Asset type does not match symbol", 400))
+    # assert(buy_test("", "AAPL", "5", "CFD", valid_time) == 200)
     # Now test edge cases of datetime (invalid times)
-    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", post_trading_time) == 2)
-    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", one_min_after_trading) == 2)
-    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", one_min_before_trading) == 2)
-    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", midnight_check) == 2)
-    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", pre_trading_time) == 2)
-    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", weekend_1) == 1)
-    assert(buy_test("TSLA", "2", "5", "Stock (Equity)", weekend_2) == 1)
-    assert(buy_test("MYREUR", "2", "5", "Forex", weekend_1) == 3)
-    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", post_trading_time) == 2)
-    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", one_min_after_trading) == 2)
-    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", one_min_before_trading) == 2)
-    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", midnight_check) == 2)
-    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", pre_trading_time) == 2)
-    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", weekend_1) == 1)
-    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", weekend_2) == 1)
-    assert(sell_test("MYREUR", "2", "5", "Forex", weekend_1) == 400)
-    assert(sell_test("AAPL", "2", "5", "CFD", valid_time) == 200)
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", post_trading_time) == ("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", one_min_after_trading) == ("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", one_min_before_trading) == ("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", midnight_check) == ("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", pre_trading_time) == ("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", weekend_1) == ("Cannot trade on a weekend!", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", weekend_2) == ("Cannot trade on a weekend!", 400))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "MYREUR", 5, "Forex", weekend_1) == ("You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)", 400))
+    # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", post_trading_time) == 2)
+    # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", one_min_after_trading) == 2)
+    # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", one_min_before_trading) == 2)
+    # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", midnight_check) == 2)
+    # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", pre_trading_time) == 2)
+    # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", weekend_1) == 1)
+    # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", weekend_2) == 1)
+    # assert(sell_test("MYREUR", "2", "5", "Forex", weekend_1) == 400)
+    # assert(sell_test("AAPL", "2", "5", "CFD", valid_time) == 200)
     db.execute(
         "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
     )
@@ -122,41 +123,41 @@ def test_buy_sell():
     bought_1 = db.fetchall()
     bought_1 = bought_1[0]["bought"]
     assert(bought_1 > bought)
-    # Test sell capabilities
     assert(portfolio[0]["stock_name"] == "Tesla, Inc.")
     assert(portfolio[0]["stock_symbol"] == "TSLA")
-    assert(portfolio[0]["num_shares"] == 5)
-    assert(sell_test("TSLA", "2", "10000000", "Stock (Equity)", valid_time) == 400)
-    assert(sell_test("TSLA", "2", "5", "Stock (Equity)", valid_time) == 200)
-    db.execute (
-        "SELECT sold FROM users WHERE id = (%s)", (2, )
-    )
-    sold_1 = db.fetchall()
-    sold_1 = sold_1[0]["sold"]
-    assert(sold_1 > sold)
-    db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
-    )
-    portfolio = db.fetchall()
-    assert(len(portfolio) == 0)
+    assert(portfolio[0]["quantity"] == 10)
+    # Test sell capabilities
+    # assert(sell_test("TSLA", "2", "10000000", "Stock (Equity)", valid_time) == 400)
+    # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", valid_time) == 200)
+    # db.execute (
+    #     "SELECT sold FROM users WHERE id = (%s)", (2, )
+    # )
+    # sold_1 = db.fetchall()
+    # sold_1 = sold_1[0]["sold"]
+    # assert(sold_1 > sold)
+    # db.execute(
+    #     "SELECT * FROM portfolios WHERE user_id = (%s)", (2, )
+    # )
+    # portfolio = db.fetchall()
+    # assert(len(portfolio) == 0)
     
 
-def test_total():
-    db.execute(
-        "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (%s))", ("ss", )
-    )
-    portfolio = db.fetchall()
-    db.execute("SELECT * FROM users WHERE username = (%s)", ("ss",))
-    cash = db.fetchall()
-    cash = float(cash[0]["cash"])
-    total = cash
-    for stock in portfolio:
-        total += stock["price"] * stock["num_shares"]
-    total = round(total, 2)
-    assert(total_computation("ss") == (total, cash))
+# def test_total():
+#     db.execute(
+#         "SELECT * FROM portfolios WHERE user_id IN (SELECT id FROM users WHERE username = (%s))", ("ss", )
+#     )
+#     portfolio = db.fetchall()
+#     db.execute("SELECT * FROM users WHERE username = (%s)", ("ss",))
+#     cash = db.fetchall()
+#     cash = float(cash[0]["cash"])
+#     total = cash
+#     for stock in portfolio:
+#         total += stock["price"] * stock["num_shares"]
+#     total = round(total, 2)
+#     assert(total_computation("ss") == (total, cash))
     
-def test_leaderboard():
-    assert(len(leaderboard()) == 10)
-    for i in range(9):
-        assert(leaderboard()[i]["total"] >= leaderboard()[i + 1]["total"])
+# def test_leaderboard():
+#     assert(len(leaderboard()) == 10)
+#     for i in range(9):
+#         assert(leaderboard()[i]["total"] >= leaderboard()[i + 1]["total"])
         

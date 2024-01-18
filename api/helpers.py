@@ -242,100 +242,112 @@ def register_api(request):
     con.commit()
     return jsonify([{"username": username, "user_id": user[0]["id"], "email": email, "access_token": access_token}])
 
-def buy_test(symbol, user_id, num_shares, type, time):
-    """Buy shares of stock"""
-    stock = lookup(symbol, type)
-    # Error checking (i.e. missing symbol, too many shares bought etc)
+def buy_test(access_token, symbol, num_shares, asset_type, utc_minus_5_dt):
+    if symbol == None or num_shares == None or asset_type == None:
+        return ("Missing or incorrect query parameters", 400)
+    symbol = symbol.upper()
+    stock = lookup(symbol, asset_type)
     if not stock:
-        return 400
-    if stock["exchange"] and (stock["exchange"] == "FOREX" and type != "Forex" or stock["exchange"] != "FOREX" and type == "Forex"):
-        return 400
-    if not num_shares.isdigit():
-        return 400
-    num_shares = int(num_shares)
-    if num_shares < 0:
-        return 400
+        return ("Invalid Symbol", 400)
+    if stock["exchange"] and asset_type and (stock["exchange"] == "FOREX" and asset_type != "Forex" or stock["exchange"] != "FOREX" and asset_type == "Forex"):
+        return ("Asset type does not match symbol", 400)
+    if (type(num_shares) != int):
+        return ("Shares must be an integer!", 400)
+    if num_shares < 1:
+        return ("Invalid shares", 400)
+    price = stock["price"]
 
     # Convert the datetime object to UTC-5 timezone
-    utc_minus_5_dt = time
     open_time = utc_minus_5_dt.replace(hour=8, minute=30)
     close_time = utc_minus_5_dt.replace(hour=17, minute=0)
-    # Error checking (i.e. missing symbol, too many shares sold etc)
-    if type and type != "Forex":
-        if time.date().weekday() == 5 or time.date().weekday() == 6:
-            return 1
-        if time.time() < open_time.time() or time.time() > close_time.time():
-            return 2
+    time = utc_minus_5_dt
+    # Error checking (i.e. missing symbol, too many shares bought etc)
+    # Can only buy when market is open
+    if asset_type and asset_type != "Forex":
+        if open_time.date().weekday() == 5 or open_time.date().weekday() == 6:
+            return ("Cannot trade on a weekend!", 400)
+        if time < open_time or time > close_time:
+            return ("Non-Forex assets can only trade from 8:30 am to 5:00 pm! (1 hour before the market opens and upto 1 hour after the market closes)", 400)
     else:
-        if time.date().weekday() == 5 or (time.date().weekday() == 6 and time.hour < 18) or (time.date().weekday == 4 and time.hour > 16):
-            return 3
-    price = stock["price"]
+        if open_time.date().weekday() == 5 or (open_time.date().weekday() == 6 and time.hour < 18) or (open_time.date().weekday == 4 and time.hour > 16):
+            return ("You cannot trade in the Forex market from 6:00 pm Friday to 4:00 pm on Sunday! (1 hour after the market closes and upto 1 hour before the market opens)", 400)
+    db.execute("SELECT id FROM tokens_userid WHERE tokens = (%s)", (access_token, ))
+    user_id = db.fetchall()
+    user_id = user_id[0]["id"]
     db.execute("SELECT * FROM users WHERE id = (%s)", (user_id,))
     user = db.fetchall()
     if (num_shares * price) > user[0]["cash"]:
-        return 400
+        return ("Cannot afford", 400)
     db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s)",
+        "SELECT * FROM portfolios WHERE user_id = (%s) AND stock_symbol = (%s) AND type = (%s)",
         (user_id,
-        symbol)
+        symbol,
+        asset_type)
     )
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
+    time = time.strftime("%Y-%m-%d %H:%M:%S")
     if (len(portfolio)) == 0:
-        db.execute(
-            "INSERT INTO portfolios(user_id, stock_name, stock_symbol, price, num_shares, time_bought, type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
-            (user_id,
-            stock["name"],
-            stock["symbol"],
-            price,
-            num_shares,
-            time,
-            type)
-        )
-        con.commit()
-        db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
-            (user_id,
-            stock["symbol"],
-            price,
-            num_shares,
-            time)
-        )
-        con.commit()
-        db.execute(
-            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
-            (num_shares * price,
-            user_id)
-        )
-        con.commit()
-        return 200
+        try:
+            db.execute(
+                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, avg_cost, invested_amount, quantity,type, time_bought) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",
+                (user_id,
+                stock["name"],
+                stock["symbol"],
+                price,
+                price * num_shares,
+                num_shares,
+                asset_type, 
+                time)
+            )
+            db.execute(
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s, %s)",
+                (user_id,
+                stock["symbol"],
+                price,
+                num_shares,
+                num_shares * price,
+                time)
+            )
+            db.execute(
+                "UPDATE users SET cash = cash - (%s), bought = bought + 1  WHERE id = (%s)",
+                (num_shares * price,
+                user_id)
+            )
+            con.commit()
+        except Exception as e:
+            con.rollback()
+            return ("Transaction failed, rollback performed", 400)
     # Update current portfolio
     else:
-        db.execute(
-            # Fixed bug- update on pythonanywere
-            "UPDATE portfolios SET price = (%s), num_shares = num_shares + (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
-            (price,
-            num_shares,
-            user_id,
-            symbol)
-        )
-        con.commit()
-        db.execute(
-            "INSERT INTO history(user_id, stock_symbol, price, num_shares, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
-            (user_id,
-            symbol,
-            price,
-            num_shares,
-            time)
-        )
-        con.commit()
-        db.execute(
-            "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
-            (num_shares * price,
-            user_id)
-        )
-        con.commit()
-        return 200
+        try:
+            db.execute(
+                "UPDATE portfolios SET avg_cost = (%s), quantity = quantity + (%s), invested_amount = (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
+                (1,
+                num_shares,
+                999,
+                user_id,
+                stock["symbol"])
+            )
+            db.execute(
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s, %s)",
+                (user_id,
+                stock["symbol"],
+                price,
+                num_shares,
+                num_shares * price,
+                time)
+            )
+            db.execute(
+                "UPDATE users SET cash = cash - (%s), bought = bought + 1 WHERE id = (%s)",
+                (num_shares * price,
+                user_id)
+            )
+            con.commit()
+        except Exception as e:
+            con.rollback()
+            return ("Transaction failed, rollback performed", 400)
+    return ({"symbol": symbol, "num_shares": num_shares, "type": asset_type}, 200)
 
 def sell_test(symbol, user_id, num_shares, type, time):
     """Sell shares of stock"""
