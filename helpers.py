@@ -287,21 +287,21 @@ def buy_test(access_token, symbol, num_shares, asset_type, utc_minus_5_dt):
     portfolio = db.fetchall()
     # Start a stock for a new user if it doesn't exist
     time = time.strftime("%Y-%m-%d %H:%M:%S")
-    print(time)
     if (len(portfolio)) == 0:
         try:
             db.execute(
-                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, avg_cost, invested_amount, quantity,type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, avg_cost, invested_amount, quantity,type, time_bought) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",
                 (user_id,
                 stock["name"],
                 stock["symbol"],
                 price,
                 price * num_shares,
                 num_shares,
-                asset_type)
+                asset_type, 
+                time)
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s, %s)",
                 (user_id,
                 stock["symbol"],
                 price,
@@ -317,12 +317,12 @@ def buy_test(access_token, symbol, num_shares, asset_type, utc_minus_5_dt):
             con.commit()
         except Exception as e:
             con.rollback()
-            return ("Transaction failed, rollback performed", 400, e)
+            return ("Transaction failed, rollback performed", 400)
     # Update current portfolio
     else:
         try:
             db.execute(
-                "UPDATE portfolios SET avg_cost = (%s), num_shares = num_shares + (%s), invested_amount = (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
+                "UPDATE portfolios SET avg_cost = (%s), quantity = quantity + (%s), invested_amount = (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
                 (1,
                 num_shares,
                 999,
@@ -330,7 +330,7 @@ def buy_test(access_token, symbol, num_shares, asset_type, utc_minus_5_dt):
                 stock["symbol"])
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s, %s)",
                 (user_id,
                 stock["symbol"],
                 price,

@@ -120,13 +120,13 @@ def portfolio_api(access_token):
     cash = db.fetchall()
     cash = float(cash[0]["cash"])
     db.execute(
-        "SELECT * FROM portfolios WHERE user_id = (%s) ORDER BY stock_symbol",
+        "SELECT * FROM portfolios WHERE user_id = (%s) ORDER BY symbol",
         (user_id,)
     )
     portfolio = db.fetchall()
     total = cash
     for stock in portfolio:
-        total += stock["avg_cost"] * stock["quantity"]
+        total += stock["invested_amount"]
     db.execute("SELECT username FROM users WHERE id = (%s)", (user_id,))
     username = db.fetchall()
     username = username[0]["username"]
@@ -473,17 +473,18 @@ def buy_api(access_token):
     if (len(portfolio)) == 0:
         try:
             db.execute(
-                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, avg_cost, invested_amount, quantity,type) VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO portfolios(user_id, stock_name, stock_symbol, avg_cost, invested_amount, quantity,type, time_bought) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",
                 (user_id,
                 stock["name"],
                 stock["symbol"],
                 price,
                 price * num_shares,
                 num_shares,
-                asset_type)
+                asset_type,
+                time)
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount, time_of_transaction) VALUES(%s, %s, %s, %s, %s, %s)",
                 (user_id,
                 stock["symbol"],
                 price,
@@ -504,7 +505,7 @@ def buy_api(access_token):
     else:
         try:
             db.execute(
-                "UPDATE portfolios SET avg_cost = (%s), num_shares = num_shares + (%s), invested_amount = (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
+                "UPDATE portfolios SET avg_cost = (%s), quantity = quantity + (%s), invested_amount = (%s) WHERE user_id = (%s) and stock_symbol = (%s)",
                 (1,
                 num_shares,
                 999,
@@ -512,7 +513,7 @@ def buy_api(access_token):
                 stock["symbol"])
             )
             db.execute(
-                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s)",
+                "INSERT INTO history(user_id, stock_symbol, transaction_price, quantity, invested_amount_per_transaction, time_of_transaction) VALUES(%s, %s, %s, %s, %s, %s)",
                 (user_id,
                 stock["symbol"],
                 price,

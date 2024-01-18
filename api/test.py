@@ -90,6 +90,7 @@ def test_buy_sell():
     assert(len(portfolio) == 0)
     # Test buy capabilities- datetime kept correct, testing other errors
     assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", valid_time) == ({"symbol": "TSLA", "num_shares": 5, "type": "Stock (Equity)"}, 200))
+    assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Stock (Equity)", valid_time) == ({"symbol": "TSLA", "num_shares": 5, "type": "Stock (Equity)"}, 200))
     assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "GOOG", 1000000, "Stock (Equity)", valid_time) == ("Cannot afford", 400))
     assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "TSLA", 5, "Forex", valid_time) == ("Asset type does not match symbol", 400))
     assert(buy_test("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcwNDIwNTkwNSwianRpIjoiYzAxNzliZTUtNjFiNS00ZjAxLTgwZjItNGIxZmRhMDg0ODhmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0In0sIm5iZiI6MTcwNDIwNTkwNSwiY3NyZiI6Ijk3YjcyMThiLTg0YWQtNDc0NC04NWUzLTBiNDlhNDEwNzUxZiIsImV4cCI6MTcwNDIwNjgwNX0.Uf6eODQaCqmT5dF_URHqXnc3raPnjntEI_Snm1M0dlI", "MYREUR", 5, "Stock (Equity)", valid_time) == ("Asset type does not match symbol", 400))
@@ -124,7 +125,7 @@ def test_buy_sell():
     assert(bought_1 > bought)
     assert(portfolio[0]["stock_name"] == "Tesla, Inc.")
     assert(portfolio[0]["stock_symbol"] == "TSLA")
-    assert(portfolio[0]["num_shares"] == 5)
+    assert(portfolio[0]["quantity"] == 10)
     # Test sell capabilities
     # assert(sell_test("TSLA", "2", "10000000", "Stock (Equity)", valid_time) == 400)
     # assert(sell_test("TSLA", "2", "5", "Stock (Equity)", valid_time) == 200)
