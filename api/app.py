@@ -133,7 +133,7 @@ def portfolio_api(access_token):
     pl = round(total - 10000, 2)
     percent_pl = round((pl / 10000) * 100, 2)
     types = ["Stock (Equity)", "Forex", "Index", "ETF", "CFD", "Commodity"]
-    data = {"portfolio": portfolio, "cash": usd(cash), "total": usd(total), "starting_amt": 10000, "username": username, "pl": pl, "percent_pl": percent_pl, "types": types}
+    data = jsonify({"portfolio": portfolio, "cash": usd(cash), "total_invested_amount": total - cash, "starting_amt": 10000, "username": username, "types": types}), 200
     return data
 
 # @app.route("/stocks", methods=["GET", "POST"])
